@@ -1,0 +1,64 @@
+"""Nightly live paper-trading run (GitHub Actions, about 9 PM Arizona). Fake money only."""
+import json
+import sys
+from pathlib import Path
+
+import pandas as pd
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+from paper_trader import data, engines, live, metrics, report  # noqa: E402
+from paper_trader.config import DATA_START, LIVE_START, MARKETS, START_CASH  # noqa: E402
+
+RES = ROOT / "results"
+LIVE = RES / "live"
+
+
+def _append(path: Path, rows: list[dict]):
+    if not rows:
+        return
+    df = pd.DataFrame(rows)
+    df["date"] = pd.to_datetime(df["date"]).dt.date.astype(str)
+    df.to_csv(path, mode="a", header=not path.exists(), index=False)
+
+
+def live_summary(skips) -> dict:
+    eq = pd.read_csv(LIVE / "equity.csv", parse_dates=["date"]) if (LIVE / "equity.csv").exists() else None
+    tr = pd.read_csv(LIVE / "trades.csv") if (LIVE / "trades.csv").exists() else pd.DataFrame()
+    out = {"phase": "live paper", "start": LIVE_START, "start_cash": START_CASH, "accounts": {}, "skips": skips}
+    for name, (mkey, kind) in engines.ACCOUNTS.items():
+        series = (eq[eq.account == name].set_index("date")["equity"] if eq is not None else pd.Series(dtype=float))
+        trades = tr[tr.account == name] if len(tr) else pd.DataFrame(columns=["realized_pnl"])
+        s = metrics.summary(series, trades, 252 if mkey == "stocks" else 365, START_CASH)
+        s.update({"market": mkey, "engine": kind})
+        out["accounts"][name] = s
+    return out
+
+
+def main():
+    today = pd.Timestamp.now(tz="UTC").tz_localize(None).normalize()
+    LIVE.mkdir(parents=True, exist_ok=True)
+    state_path = LIVE / "state.json"
+    state = json.loads(state_path.read_text()) if state_path.exists() else live.init_state()
+    panels = {}
+    for k, m in MARKETS.items():
+        try:
+            panels[k] = data.complete_days(data.fetch(m, DATA_START), today)
+        except Exception as exc:  # a failed source skips that market; it never trades on bad data
+            print(f"{k}: fetch failed: {exc}")
+            panels[k] = None
+    state, eq_rows, trade_rows = live.run(state, panels, today)
+    _append(LIVE / "equity.csv", eq_rows)
+    _append(LIVE / "trades.csv", trade_rows)
+    state_path.write_text(json.dumps(state, indent=2, default=str))
+    backtest = json.loads((RES / "backtest" / "summary.json").read_text())
+    summary = {"generated_at": pd.Timestamp.now(tz="UTC").isoformat(timespec="minutes"),
+               "live": live_summary(state["skips"]), "backtest": backtest}
+    (RES / "summary.json").write_text(json.dumps(summary, indent=2, default=str))
+    report.build(RES, ROOT / "site")
+    print(f"processed {len(eq_rows)} account-days, {len(trade_rows)} trades")
+
+
+if __name__ == "__main__":
+    main()

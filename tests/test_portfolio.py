@@ -47,3 +47,12 @@ def test_nan_price_leaves_position_untouched():
 def test_equity_marks_positions():
     acct = Account(cash=100.0, positions={"AAA": 2.0})
     assert acct.equity(prices(AAA=50.0)) == 200.0
+
+
+def test_scaled_down_buys_below_threshold_are_skipped():
+    # AAA cannot trade today (no price), so only $2 of cash exists for a $200 buy of BBB.
+    acct = Account(cash=2.0, positions={"AAA": 39.8})
+    trades = acct.rebalance(pd.Series({"BBB": 0.5}), prices(AAA=float("nan"), BBB=10.0), cost_rate=0.0,
+                            value_prices=prices(AAA=10.0, BBB=10.0))
+    assert trades == []
+    assert acct.cash >= 0
