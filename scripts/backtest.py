@@ -8,8 +8,8 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from paper_trader import data, engines, metrics, simulate  # noqa: E402
-from paper_trader.config import BACKTEST_END, BACKTEST_START, DATA_START, MARKETS, START_CASH  # noqa: E402
+from paper_trader import data, engines, metrics, simulate
+from paper_trader.config import BACKTEST_END, BACKTEST_START, DATA_START, MARKETS, START_CASH
 
 OUT = Path(__file__).resolve().parents[1] / "results" / "backtest"
 

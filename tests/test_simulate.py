@@ -3,7 +3,6 @@ import pandas as pd
 
 from paper_trader import metrics, simulate
 from paper_trader.portfolio import Account
-from tests.conftest import make_panel
 
 
 def bench_weights(panel, ticker, decide_on):
@@ -16,7 +15,7 @@ def bench_weights(panel, ticker, decide_on):
 def test_benchmark_trades_once(panel):
     start = panel.dates[10]
     w = bench_weights(panel, "AAA", panel.dates[9])
-    eq, trades, _ = simulate.run(panel, w, start, panel.dates[-1], 400.0, 0.0005)
+    _, trades, _ = simulate.run(panel, w, start, panel.dates[-1], 400.0, 0.0005)
     assert len(trades) == 1
     assert trades.iloc[0]["date"] == start
 
@@ -32,7 +31,7 @@ def test_equity_is_cash_plus_marked_positions(panel):
 def test_fill_happens_at_next_open(panel):
     # Perfect foresight of the close-to-close move cannot be captured: orders fill at the next open.
     w = pd.DataFrame(0.0, index=panel.dates, columns=panel.tickers)
-    eq, trades, _ = simulate.run(panel, w.assign(AAA=1.0), panel.dates[5], panel.dates[6], 400.0, 0.0)
+    _, trades, _ = simulate.run(panel, w.assign(AAA=1.0), panel.dates[5], panel.dates[6], 400.0, 0.0)
     assert trades.iloc[0]["price"] == panel.open.loc[panel.dates[5], "AAA"]
 
 

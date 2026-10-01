@@ -3,7 +3,6 @@ import pandas as pd
 import pytest
 
 from paper_trader import strategies, tournament
-from tests.conftest import make_panel
 
 FUNCS = [strategies.momentum, strategies.mean_reversion, strategies.trend]
 

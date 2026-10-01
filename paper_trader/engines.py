@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from paper_trader import ml, tournament
-from paper_trader.config import MARKETS, ML_THRESHOLD
+from paper_trader.config import ML_THRESHOLD
 from paper_trader.strategies import STRATEGIES, rsi
 
 ACCOUNTS = {
