@@ -84,9 +84,10 @@ sub-strategies in proportion to their trailing 3-month risk-adjusted return
 Weekdays and weekends (crypto trades every day; stock accounts skip days the
 market is closed), around 9 PM Arizona time:
 
-1. Fetch daily prices (yfinance; on failure, Stooq for stocks and Coinbase's
-   public candles for crypto). If every source fails, skip the day and record
-   why. Never trade on stale data.
+1. Fetch daily prices (yfinance with retries; for crypto, Coinbase's public
+   candles as the fallback). Stooq was dropped on 2026-09-30: it now serves a
+   bot challenge. If a market's data is missing or stale, skip that market for
+   the day and record why. Never trade on stale data.
 2. Fill yesterday's orders at today's open, then decide tomorrow's orders.
 3. Retrain the ML model if due.
 4. Append decisions to the trade log; write `results/state.json`,
