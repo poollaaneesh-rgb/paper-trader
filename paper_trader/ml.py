@@ -41,6 +41,7 @@ def weights(panel, max_positions: int, start, retrain: str = RETRAIN_EVERY,
     X = F.build(panel).dropna()
     y = F.labels(panel)
     out = pd.DataFrame(0.0, index=dates[dates >= start], columns=panel.tickers)
+    probs = pd.DataFrame(np.nan, index=out.index, columns=panel.tickers)
     bounds = boundaries(dates, retrain)
     preds = []
     retrains = 0
@@ -72,9 +73,10 @@ def weights(panel, max_positions: int, start, retrain: str = RETRAIN_EVERY,
         preds.append(pd.DataFrame({"hgb": p, "lr": p_lr}))
         for d, row in p.groupby(level="date"):
             row = row.droplevel("date")
+            probs.loc[d, row.index] = row.to_numpy()
             picks = row[row > threshold].nlargest(max_positions)
             out.loc[d, picks.index] = 1.0 / max_positions
-    diag = {"retrains": retrains}
+    diag = {"retrains": retrains, "probs": probs}
     if preds:
         allp = pd.concat(preds)
         truth = y.reindex(allp.index)

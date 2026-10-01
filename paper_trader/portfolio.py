@@ -73,6 +73,8 @@ class Account:
         for t, diff in buys.items():
             p = prices[t]
             value = diff * scale
+            if value < threshold:  # cash ran short; a sliver of a buy is not worth logging or paying for
+                continue
             cost = value * cost_rate
             self.cash -= value + cost
             self.positions[t] = self.positions.get(t, 0.0) + value / p
