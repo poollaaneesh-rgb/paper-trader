@@ -1,0 +1,71 @@
+{
+ "generated_at": "2026-10-01T02:23+00:00",
+ "page": "https://poollaaneesh-rgb.github.io/paper-trader/",
+ "live_start": "2026-10-01",
+ "live": {
+  "tournament_stocks": {
+   "final_equity": 400.0,
+   "total_return": 0.0,
+   "days": 0,
+   "n_trades": 0
+  },
+  "tournament_crypto": {
+   "final_equity": 400.0,
+   "total_return": 0.0,
+   "days": 0,
+   "n_trades": 0
+  },
+  "ml_stocks": {
+   "final_equity": 400.0,
+   "total_return": 0.0,
+   "days": 0,
+   "n_trades": 0
+  },
+  "ml_crypto": {
+   "final_equity": 400.0,
+   "total_return": 0.0,
+   "days": 0,
+   "n_trades": 0
+  },
+  "bench_spy": {
+   "final_equity": 400.0,
+   "total_return": 0.0,
+   "days": 0,
+   "n_trades": 0
+  },
+  "bench_btc": {
+   "final_equity": 400.0,
+   "total_return": 0.0,
+   "days": 0,
+   "n_trades": 0
+  }
+ },
+ "backtest": {
+  "tournament_stocks": {
+   "final_equity": 1254.68,
+   "total_return": 2.1367051802811132
+  },
+  "tournament_crypto": {
+   "final_equity": 249.59,
+   "total_return": -0.3760194796758607
+  },
+  "ml_stocks": {
+   "final_equity": 597.35,
+   "total_return": 0.4933799868073363
+  },
+  "ml_crypto": {
+   "final_equity": 2.75,
+   "total_return": -0.9931347741867137
+  },
+  "bench_spy": {
+   "final_equity": 1299.9,
+   "total_return": 2.2497610877685252
+  },
+  "bench_btc": {
+   "final_equity": 2357.25,
+   "total_return": 4.893129413920892
+  }
+ },
+ "latest_trades": [],
+ "skips": []
+}

@@ -99,6 +99,7 @@ table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
 th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:right;font-weight:600;padding:8px 10px;border-bottom:1px solid var(--navy)}
 td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
 th:first-child,td:first-child{text-align:left}
+#trades th,#trades td{text-align:left}#trades th:nth-child(4),#trades td:nth-child(4){text-align:right}
 td.reason{text-align:left;white-space:normal;color:var(--ink2);min-width:260px}
 .key{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:8px}
 .key.dash{background:repeating-linear-gradient(90deg,var(--ref) 0 4px,transparent 4px 7px)}
@@ -131,6 +132,7 @@ footer{margin-top:56px;font-size:12px;color:var(--muted);border-top:1px solid va
 <li><b>ML model.</b> Gradient-boosted trees on nine price features (returns over 1 to 60 days, volatility, RSI, distance from moving averages, volume change) predict whether each asset rises over the next holding day. Retrained every week on data up to two days before, then holds the top picks above 55% odds. A logistic regression runs alongside as a sanity check.</li>
 <li><b>No look-ahead.</b> Decisions use data up to the close; orders fill at the next day's open. Automated tests truncate the data and check that no past decision changes.</li>
 <li><b>Costs.</b> Stocks pay 0.05% slippage per trade; crypto pays 0.5% fees plus slippage.</li>
+<li><b>Fees decide the ML result.</b> The ML model trades a lot: it turns over about 57% of the stock account and 24% of the crypto account every day. In the backtest the stock model ends at $2,083 with no fees, $597 with the real 0.05% and $171 at 0.1%. The crypto model would have reached $3,620 with no fees and ends at $2.75 after its 0.55% per trade. Its daily up/down calls are right about 52 to 53% of the time, close to how often prices simply rise. Two downloads of the same prices that differed by one part in a million moved the stock result between $484 and $965, so the backtest prices are frozen in the repo to make these numbers reproducible.</li>
 <li><b>Known limits.</b> The universe is today's large companies and coins, which flatters any backtest (survivorship bias). Only the live paper record is real evidence.</li>
 </ul>
 <footer>Fake money only. This is a research project, not investment advice, and it is not connected to any brokerage. Code: <a href="https://github.com/poollaaneesh-rgb/paper-trader">github.com/poollaaneesh-rgb/paper-trader</a></footer>
