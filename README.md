@@ -50,5 +50,3 @@ python -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python scripts/backtest.py     # about 2.5 minutes; uses the frozen prices
 .venv/bin/python scripts/run_daily.py    # steps the live accounts and rebuilds site/
 ```
-
-Built with Claude Code.
