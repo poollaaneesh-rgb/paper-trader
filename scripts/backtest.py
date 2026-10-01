@@ -14,9 +14,21 @@ from paper_trader.config import BACKTEST_END, BACKTEST_START, DATA_START, MARKET
 OUT = Path(__file__).resolve().parents[1] / "results" / "backtest"
 
 
+def frozen_panel(key, market):
+    """The backtest's prices are saved once and reused: Yahoo's adjusted prices shift by about 1e-6
+    between downloads, which is enough to change the ML results. A frozen copy makes them reproducible."""
+    path = OUT / f"prices_{key}.csv.gz"
+    if path.exists():
+        df = pd.read_csv(path, header=[0, 1], index_col=0, parse_dates=True)
+        return data.Panel(*(df[f].astype(float) for f in ("open", "close", "volume")))
+    panel = data.fetch(market, DATA_START).truncate(BACKTEST_END)
+    pd.concat({"open": panel.open, "close": panel.close, "volume": panel.volume}, axis=1).to_csv(path)
+    return panel
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
-    panels = {k: data.fetch(m, DATA_START).truncate(BACKTEST_END) for k, m in MARKETS.items()}
+    panels = {k: frozen_panel(k, m) for k, m in MARKETS.items()}
     equity, trades, summary = [], [], {"phase": "backtest", "start": BACKTEST_START, "end": BACKTEST_END,
                                        "start_cash": START_CASH, "accounts": {}}
     for name, (mkey, kind) in engines.ACCOUNTS.items():
