@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-01T02:25+00:00",
+  "generated_at": "2026-10-01T10:38+00:00",
   "live": {
     "phase": "live paper",
     "start": "2026-10-01",
@@ -17,13 +17,13 @@
         "engine": "tournament"
       },
       "tournament_crypto": {
-        "final_equity": 400.0,
-        "total_return": 0.0,
+        "final_equity": 399.19,
+        "total_return": -0.0020250000000000545,
         "max_drawdown": 0.0,
         "sharpe": null,
         "win_rate": null,
-        "n_trades": 0,
-        "days": 0,
+        "n_trades": 6,
+        "days": 1,
         "market": "crypto",
         "engine": "tournament"
       },
@@ -39,13 +39,13 @@
         "engine": "ml"
       },
       "ml_crypto": {
-        "final_equity": 400.0,
-        "total_return": 0.0,
+        "final_equity": 401.04,
+        "total_return": 0.0026000000000001577,
         "max_drawdown": 0.0,
         "sharpe": null,
         "win_rate": null,
-        "n_trades": 0,
-        "days": 0,
+        "n_trades": 1,
+        "days": 1,
         "market": "crypto",
         "engine": "ml"
       },
@@ -61,13 +61,13 @@
         "engine": "bench"
       },
       "bench_btc": {
-        "final_equity": 400.0,
-        "total_return": 0.0,
+        "final_equity": 397.49,
+        "total_return": -0.0062750000000000306,
         "max_drawdown": 0.0,
         "sharpe": null,
         "win_rate": null,
-        "n_trades": 0,
-        "days": 0,
+        "n_trades": 1,
+        "days": 1,
         "market": "crypto",
         "engine": "bench"
       }
