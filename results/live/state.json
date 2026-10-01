@@ -40,9 +40,23 @@
       "initialised": true
     },
     "tournament_crypto": {
-      "cash": 400.0,
-      "positions": {},
-      "avg_cost": {},
+      "cash": 218.788838146241,
+      "positions": {
+        "BNB-USD": 0.01049517914663118,
+        "ETH-USD": 0.020461507743170435,
+        "BTC-USD": 9.514598924373506e-05,
+        "SOL-USD": 0.4600306851060718,
+        "ADA-USD": 191.62140365399182,
+        "XRP-USD": 5.339640473310525
+      },
+      "avg_cost": {
+        "BNB-USD": 762.2547350769042,
+        "ETH-USD": 2691.4139454345705,
+        "BTC-USD": 84081.31612890626,
+        "SOL-USD": 119.71024774551391,
+        "ADA-USD": 0.24564263901114464,
+        "XRP-USD": 1.4982282121777535
+      },
       "pending": {
         "BTC-USD": 0.020000000000000004,
         "ETH-USD": 0.13767596821146588,
@@ -51,7 +65,7 @@
         "XRP-USD": 0.020000000000000004,
         "ADA-USD": 0.11767596821146586
       },
-      "last_date": "2026-09-29",
+      "last_date": "2026-09-30",
       "initialised": true
     },
     "ml_stocks": {
@@ -94,18 +108,22 @@
       "initialised": true
     },
     "ml_crypto": {
-      "cash": 400.0,
-      "positions": {},
-      "avg_cost": {},
+      "cash": 266.6666666666667,
+      "positions": {
+        "BNB-USD": 0.17491965244385296
+      },
+      "avg_cost": {
+        "BNB-USD": 762.2547350769042
+      },
       "pending": {
         "BTC-USD": 0.0,
         "ETH-USD": 0.0,
         "SOL-USD": 0.0,
-        "BNB-USD": 0.3333333333333333,
+        "BNB-USD": 0.0,
         "XRP-USD": 0.0,
         "ADA-USD": 0.0
       },
-      "last_date": "2026-09-29",
+      "last_date": "2026-09-30",
       "initialised": true
     },
     "bench_spy": {
@@ -148,9 +166,13 @@
       "initialised": true
     },
     "bench_btc": {
-      "cash": 400.0,
-      "positions": {},
-      "avg_cost": {},
+      "cash": 0.0,
+      "positions": {
+        "BTC-USD": 0.004757299462186752
+      },
+      "avg_cost": {
+        "BTC-USD": 84081.31612890626
+      },
       "pending": {
         "BTC-USD": 1.0,
         "ETH-USD": 0.0,
@@ -159,7 +181,7 @@
         "XRP-USD": 0.0,
         "ADA-USD": 0.0
       },
-      "last_date": "2026-09-29",
+      "last_date": "2026-09-30",
       "initialised": true
     }
   },
