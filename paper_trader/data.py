@@ -22,7 +22,7 @@ class Panel:
     def dates(self) -> pd.DatetimeIndex:
         return self.close.index
 
-    def truncate(self, end) -> "Panel":
+    def truncate(self, end) -> Panel:
         end = pd.Timestamp(end)
         return Panel(self.open.loc[:end], self.close.loc[:end], self.volume.loc[:end])
 

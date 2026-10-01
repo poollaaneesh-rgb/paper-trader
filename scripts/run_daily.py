@@ -8,8 +8,8 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from paper_trader import data, engines, live, metrics, report  # noqa: E402
-from paper_trader.config import DATA_START, LIVE_START, MARKETS, START_CASH  # noqa: E402
+from paper_trader import data, engines, live, metrics, report
+from paper_trader.config import DATA_START, LIVE_START, MARKETS, START_CASH
 
 RES = ROOT / "results"
 LIVE = RES / "live"

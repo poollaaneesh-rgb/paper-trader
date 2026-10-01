@@ -1,3 +1,20 @@
+[project]
+name = "paper-trader"
+version = "0.1.0"
+description = "Fake-money trading bot: a strategy tournament and an ML model against buy-and-hold"
+requires-python = ">=3.11"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+# The scripts add the repo root to sys.path before importing the package.
+"scripts/*" = ["E402"]

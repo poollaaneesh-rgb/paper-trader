@@ -1,5 +1,7 @@
 # Paper Trader
 
+[![CI](https://github.com/poollaaneesh-rgb/paper-trader/actions/workflows/ci.yml/badge.svg)](https://github.com/poollaaneesh-rgb/paper-trader/actions/workflows/ci.yml)
+
 A strategy tournament and a machine-learning model each trade **$400 of fake money**, once a day, in US stocks and in crypto, and have to beat buy-and-hold. Results: **https://poollaaneesh-rgb.github.io/paper-trader/**
 
 Fake money only. Not connected to any brokerage, holds no keys, and is not investment advice.
@@ -25,11 +27,26 @@ Fake money only. Not connected to any brokerage, holds no keys, and is not inves
 - The ML model's daily up/down calls are right about 53% of the time, close to the base rate, and it turns over 57% of the stock account a day. Fees decide its result: $2,083 with no fees, $597 at 0.05%, $171 at 0.1%. In crypto, 0.55% per trade took it from $3,620 (no fees) to $2.75.
 - Survivorship bias: the universe is today's large names, which flatters every backtest here.
 
+## Code map
+
+| File | What it does |
+|---|---|
+| `paper_trader/strategies.py` | Momentum, mean reversion and trend, each a function from prices to target weights |
+| `paper_trader/tournament.py` | Monthly capital allocation across the three strategies by trailing Sharpe |
+| `paper_trader/features.py`, `ml.py` | Nine price features, the forward label, weekly walk-forward retraining |
+| `paper_trader/portfolio.py`, `simulate.py` | Cash-and-units account with costs; next-open fills |
+| `paper_trader/live.py`, `data.py` | Nightly step-forward with stale-data guards; yfinance plus Coinbase fallback |
+| `paper_trader/metrics.py`, `report.py` | Scorecard numbers and the static results page |
+| `bquant/` | The stock tournament rerun on Bloomberg prices, for comparison |
+
+Design decisions and known limits: [docs/design.md](docs/design.md).
+
 ## Run it
 
 ```bash
 python -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python -m pytest -q
+.venv/bin/pip install ruff && .venv/bin/ruff check .
 .venv/bin/python scripts/backtest.py     # about 2.5 minutes; uses the frozen prices
 .venv/bin/python scripts/run_daily.py    # steps the live accounts and rebuilds site/
 ```

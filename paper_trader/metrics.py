@@ -16,6 +16,6 @@ def summary(equity: pd.Series, trades: pd.DataFrame, periods: int, start_cash: f
         "max_drawdown": float((equity / equity.cummax() - 1).min()),
         "sharpe": float(rets.mean() / sd * np.sqrt(periods)) if sd and sd > 0 else None,
         "win_rate": float((pnl > 0).mean()) if len(pnl) else None,
-        "n_trades": int(len(trades)),
-        "days": int(len(equity)),
+        "n_trades": len(trades),
+        "days": len(equity),
     }

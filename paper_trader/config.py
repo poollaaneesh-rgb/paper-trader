@@ -15,7 +15,7 @@ SLIPPAGE = 0.0005
 @dataclass(frozen=True)
 class Market:
     name: str
-    tickers: tuple
+    tickers: tuple[str, ...]
     benchmark: str
     cost_rate: float
     max_positions: int
