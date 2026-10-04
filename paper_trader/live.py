@@ -61,14 +61,15 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None):
             if akey != mkey:
                 continue
             a = state["accounts"][name]
-            new_days = panel.dates[panel.dates > pd.Timestamp(a["last_date"])]
-            if not a["initialised"]:
-                new_days = panel.dates[panel.dates >= pd.Timestamp(LIVE_START)]
-            if len(new_days) == 0 and a["initialised"]:
+            start = pd.Timestamp(LIVE_START)
+            # Never trade before the start, and don't initialise until the first live day has closed: an account
+            # set up earlier would take its first decision from a day that hadn't finished yet.
+            new_days = panel.dates[(panel.dates > pd.Timestamp(a["last_date"])) & (panel.dates >= start)]
+            if len(new_days) == 0:
                 continue
             w, explain, _ = engines.targets(kind, market, panel, LIVE_START)
             if not a["initialised"]:
-                decide = panel.dates[panel.dates < pd.Timestamp(LIVE_START)][-1]
+                decide = panel.dates[panel.dates < start][-1]
                 row = w.loc[decide]
                 a["pending"] = None if row.isna().all() else row.fillna(0.0).to_dict()
                 a["initialised"] = True

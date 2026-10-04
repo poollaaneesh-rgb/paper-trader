@@ -34,3 +34,16 @@ def test_stale_market_is_skipped():
     assert eq == [] and trades == []
     assert state["accounts"] == before
     assert state["skips"][-1]["market"] == "crypto"
+
+
+def test_seeding_before_the_first_live_day_never_trades_before_it(monkeypatch):
+    # Seeded while the day before the start was still an unfinished candle, then run the next day:
+    # the first fill must be on the start date, decided at the close of the day before it.
+    monkeypatch.setattr(live, "LIVE_START", "2026-10-01")
+    full = make_panel(n_days=2650, freq="D")
+    state = live.init_state(ACCTS)
+    state, eq, trades = live.run(state, {"crypto": full.truncate("2026-09-29")}, pd.Timestamp("2026-09-30"), MKT, ACCTS)
+    assert eq == [] and trades == []
+    state, eq, trades = live.run(state, {"crypto": full.truncate("2026-10-02")}, pd.Timestamp("2026-10-03"), MKT, ACCTS)
+    assert min(str(r["date"].date()) for r in eq) == "2026-10-01"
+    assert min(str(t["date"].date()) for t in trades) == "2026-10-01"

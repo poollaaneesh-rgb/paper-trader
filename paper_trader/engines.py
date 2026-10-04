@@ -59,7 +59,9 @@ def targets(kind: str, market, panel, start):
     probs = diag.pop("probs")
 
     def explain(d, t, side):
-        p = probs.at[d, t] if d in probs.index else np.nan
+        if d not in probs.index:
+            return "decided before the model's first scored day"
+        p = probs.at[d, t]
         if np.isnan(p):
             return "no model yet (needs a year of training data)"
         if side == "buy":
