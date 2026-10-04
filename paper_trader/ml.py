@@ -84,4 +84,6 @@ def weights(panel, max_positions: int, start, retrain: str = RETRAIN_EVERY, thre
             hit = ((allp[name] > 0.5).astype(float) == truth)[known]
             diag[f"{name}_hit_rate"] = round(float(hit.mean()), 4) if len(hit) else None
         diag["predictions_scored"] = int(known.sum())
+        # The bar a direction model has to clear: always guessing "up" is right this often.
+        diag["up_rate"] = round(float(truth[known].mean()), 4) if known.any() else None
     return out, diag

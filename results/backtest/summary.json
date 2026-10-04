@@ -54,7 +54,8 @@
         "retrains": 458,
         "hgb_hit_rate": 0.5319,
         "lr_hit_rate": 0.5329,
-        "predictions_scored": 65910
+        "predictions_scored": 65910,
+        "up_rate": 0.5348
       }
     },
     "ml_crypto": {
@@ -71,7 +72,8 @@
         "retrains": 458,
         "hgb_hit_rate": 0.5219,
         "lr_hit_rate": 0.5186,
-        "predictions_scored": 17540
+        "predictions_scored": 17540,
+        "up_rate": 0.5032
       }
     },
     "bench_spy": {

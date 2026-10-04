@@ -2,7 +2,7 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Paper Trader</title>
-<meta name="description" content="Two self-learning strategies trade $400 of fake money each, every day, against buy-and-hold.">
+<meta name="description" content="A strategy tournament and a weekly-retrained ML model each trade $400 of fake money, every day, against buy-and-hold.">
 <style>
 :root{--bg:#ffffff;--ink:#15181e;--ink2:#4a5060;--muted:#6b7280;--line:#e3e5ea;--navy:#0b2545;--red:#c8102e;
 --s1:#1c5cab;--s2:#eb6834;--ref:#6b7280}
@@ -75,6 +75,7 @@ const num = (v, d = 2) => v == null ? '–' : Number(v).toFixed(d);
 const kindOf = n => n.startsWith('ml') ? 'ml' : n.startsWith('bench') ? 'bench' : 'tournament';
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 document.getElementById('updated').textContent = 'Updated ' + D.updated;
+const MIN_DAYS = 60; // ratios over fewer trading days are noise
 const live = D.summary.live, bt = D.summary.backtest;
 const liveStart = new Date(live.start + 'T12:00:00').toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
 document.getElementById('live-since').textContent = 'Since ' + liveStart + ' · starts at $400 each · one real day at a time';
@@ -139,9 +140,11 @@ function section(rootId, block, curves, phase) {
     const id = rootId + '-' + market;
     html += '<div class="chart"><canvas id="' + id + '" role="img" aria-label="' + esc(title) + ' account balance over time"></canvas></div>' + legend(names);
     html += '<div class="scroll"><table><thead><tr><th>Account</th><th>Balance</th><th>Return</th><th>Worst drop</th><th>Sharpe</th><th>Win rate</th><th>Trades</th></tr></thead><tbody>' +
-      names.map(n => { const a = accts[n]; return '<tr><td>' + esc(D.labels[n]) + '</td><td>' + money(a.final_equity) + '</td><td>' + pct(a.total_return) + '</td><td>' + pct(a.max_drawdown) + '</td><td>' + num(a.sharpe) + '</td><td>' + (a.win_rate == null ? '–' : Math.round(a.win_rate * 100) + '%') + '</td><td>' + a.n_trades + '</td></tr>'; }).join('') + '</tbody></table></div>';
+      names.map(n => { const a = accts[n]; const early = phase === 'live' && a.days < MIN_DAYS;
+        return '<tr><td>' + esc(D.labels[n]) + '</td><td>' + money(a.final_equity) + '</td><td>' + pct(a.total_return) + '</td><td>' + (early ? '–' : pct(a.max_drawdown)) + '</td><td>' + (early ? '–' : num(a.sharpe)) + '</td><td>' + (early || a.win_rate == null ? '–' : Math.round(a.win_rate * 100) + '%') + '</td><td>' + a.n_trades + '</td></tr>'; }).join('') + '</tbody></table></div>';
+    if (phase === 'live' && names.some(n => accts[n].days < MIN_DAYS)) html += '<p class="meta">Worst drop, Sharpe and win rate appear after ' + MIN_DAYS + ' trading days; over a few days they mean nothing.</p>';
     const ml = accts[names[1]].diagnostics;
-    if (ml && ml.hgb_hit_rate != null) html += '<p class="meta">ML direction hit rate ' + Math.round(ml.hgb_hit_rate * 1000) / 10 + '% (logistic baseline ' + Math.round(ml.lr_hit_rate * 1000) / 10 + '%, a coin flip is 50%) over ' + ml.predictions_scored.toLocaleString() + ' predictions, ' + ml.retrains + ' weekly retrains.</p>';
+    if (ml && ml.hgb_hit_rate != null) html += '<p class="meta">ML direction hit rate ' + Math.round(ml.hgb_hit_rate * 1000) / 10 + '% (logistic baseline ' + Math.round(ml.lr_hit_rate * 1000) / 10 + '%) over ' + ml.predictions_scored.toLocaleString() + ' predictions, ' + ml.retrains + ' weekly retrains.' + (ml.up_rate != null ? ' Prices rose on ' + Math.round(ml.up_rate * 1000) / 10 + '% of these days, so always guessing \'up\' would score that much; a useful model has to beat it.' : '') + '</p>';
     root.insertAdjacentHTML('beforeend', html);
     chart(document.getElementById(id), curves, names);
   }
