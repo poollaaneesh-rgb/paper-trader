@@ -2,6 +2,7 @@
 
 Every row uses only data up to that row's close; tests enforce this by truncation.
 """
+
 import numpy as np
 import pandas as pd
 

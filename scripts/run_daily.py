@@ -1,4 +1,5 @@
 """Nightly live paper-trading run (GitHub Actions, about 9 PM Arizona). Fake money only."""
+
 import json
 import sys
 from pathlib import Path
@@ -28,7 +29,7 @@ def live_summary(skips) -> dict:
     tr = pd.read_csv(LIVE / "trades.csv") if (LIVE / "trades.csv").exists() else pd.DataFrame()
     out = {"phase": "live paper", "start": LIVE_START, "start_cash": START_CASH, "accounts": {}, "skips": skips}
     for name, (mkey, kind) in engines.ACCOUNTS.items():
-        series = (eq[eq.account == name].set_index("date")["equity"] if eq is not None else pd.Series(dtype=float))
+        series = eq[eq.account == name].set_index("date")["equity"] if eq is not None else pd.Series(dtype=float)
         trades = tr[tr.account == name] if len(tr) else pd.DataFrame(columns=["realized_pnl"])
         s = metrics.summary(series, trades, 252 if mkey == "stocks" else 365, START_CASH)
         s.update({"market": mkey, "engine": kind})
@@ -53,8 +54,11 @@ def main():
     _append(LIVE / "trades.csv", trade_rows)
     state_path.write_text(json.dumps(state, indent=2, default=str))
     backtest = json.loads((RES / "backtest" / "summary.json").read_text())
-    summary = {"generated_at": pd.Timestamp.now(tz="UTC").isoformat(timespec="minutes"),
-               "live": live_summary(state["skips"]), "backtest": backtest}
+    summary = {
+        "generated_at": pd.Timestamp.now(tz="UTC").isoformat(timespec="minutes"),
+        "live": live_summary(state["skips"]),
+        "backtest": backtest,
+    }
     (RES / "summary.json").write_text(json.dumps(summary, indent=2, default=str))
     report.build(RES, ROOT / "site")
     print(f"processed {len(eq_rows)} account-days, {len(trade_rows)} trades")

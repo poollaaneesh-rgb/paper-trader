@@ -1,4 +1,5 @@
 """ML engine: gradient-boosted trees predicting next-holding-period direction, retrained weekly."""
+
 from __future__ import annotations
 
 import numpy as np
@@ -27,14 +28,12 @@ def train_end(dates: pd.DatetimeIndex, boundary) -> pd.Timestamp | None:
 
 
 def _models():
-    hgb = HistGradientBoostingClassifier(max_iter=100, learning_rate=0.05, max_leaf_nodes=15,
-                                         random_state=0)
+    hgb = HistGradientBoostingClassifier(max_iter=100, learning_rate=0.05, max_leaf_nodes=15, random_state=0)
     lr = make_pipeline(StandardScaler(), LogisticRegression(max_iter=500))
     return hgb, lr
 
 
-def weights(panel, max_positions: int, start, retrain: str = RETRAIN_EVERY,
-            threshold: float = ML_THRESHOLD):
+def weights(panel, max_positions: int, start, retrain: str = RETRAIN_EVERY, threshold: float = ML_THRESHOLD):
     """Target weights from `start` on, plus diagnostics (retrains, out-of-sample hit rates)."""
     dates = panel.dates
     start = pd.Timestamp(start)

@@ -1,4 +1,5 @@
 """The six fake accounts: which market, which engine, and why each trade happened."""
+
 from __future__ import annotations
 
 import numpy as np
@@ -35,13 +36,18 @@ def targets(kind: str, market, panel, start):
         mom = close.shift(5) / close.shift(68) - 1
         rsi5 = rsi(close, 5)
         dist50 = close / close.rolling(50, min_periods=50).mean() - 1
-        signal = {"momentum": lambda d, t: f"3-mo return {mom.at[d, t]:+.1%}",
-                  "mean_reversion": lambda d, t: f"5-day RSI {rsi5.at[d, t]:.0f}",
-                  "trend": lambda d, t: f"{dist50.at[d, t]:+.1%} vs 50-day avg"}
+        signal = {
+            "momentum": lambda d, t: f"3-mo return {mom.at[d, t]:+.1%}",
+            "mean_reversion": lambda d, t: f"5-day RSI {rsi5.at[d, t]:.0f}",
+            "trend": lambda d, t: f"{dist50.at[d, t]:+.1%} vs 50-day avg",
+        }
 
         def explain(d, t, side):
-            parts = [f"{name.replace('_', ' ')} wants {per[name].at[d, t] * alloc.at[d, name]:.0%} "
-                     f"({signal[name](d, t)})" for name in per if per[name].at[d, t] > 0]
+            parts = [
+                f"{name.replace('_', ' ')} wants {per[name].at[d, t] * alloc.at[d, name]:.0%} ({signal[name](d, t)})"
+                for name in per
+                if per[name].at[d, t] > 0
+            ]
             if parts:
                 return "; ".join(parts)
             return "no strategy holds it any more"

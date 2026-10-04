@@ -1,4 +1,5 @@
 """A cash-and-units account with proportional trading costs. Fake money only."""
+
 from __future__ import annotations
 
 import math
@@ -32,8 +33,9 @@ class Account:
                 total += units * p
         return total
 
-    def rebalance(self, weights: pd.Series, prices: pd.Series, cost_rate: float,
-                  value_prices: pd.Series | None = None) -> list[Trade]:
+    def rebalance(
+        self, weights: pd.Series, prices: pd.Series, cost_rate: float, value_prices: pd.Series | None = None
+    ) -> list[Trade]:
         """Trade toward target weights at `prices`. Tickers without a usable price are left alone.
 
         `value_prices` (last known closes) values untradable holdings so the targets use true equity.

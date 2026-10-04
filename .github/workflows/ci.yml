@@ -19,4 +19,5 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt ruff==0.16.9
       - run: ruff check .
+      - run: ruff format --check .
       - run: python -m pytest -q

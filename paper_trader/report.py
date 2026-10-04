@@ -1,4 +1,5 @@
 """Builds the public results page (site/index.html) and the dashboard feed (site/summary.json)."""
+
 from __future__ import annotations
 
 import json
@@ -9,11 +10,17 @@ import pandas as pd
 TEMPLATE = (Path(__file__).parent / "page_template.html").read_text()
 
 LABELS = {
-    "tournament_stocks": "Tournament", "ml_stocks": "ML model", "bench_spy": "S&P 500 buy-and-hold",
-    "tournament_crypto": "Tournament", "ml_crypto": "ML model", "bench_btc": "Bitcoin buy-and-hold",
+    "tournament_stocks": "Tournament",
+    "ml_stocks": "ML model",
+    "bench_spy": "S&P 500 buy-and-hold",
+    "tournament_crypto": "Tournament",
+    "ml_crypto": "ML model",
+    "bench_btc": "Bitcoin buy-and-hold",
 }
-MARKET_ACCOUNTS = {"stocks": ["tournament_stocks", "ml_stocks", "bench_spy"],
-                   "crypto": ["tournament_crypto", "ml_crypto", "bench_btc"]}
+MARKET_ACCOUNTS = {
+    "stocks": ["tournament_stocks", "ml_stocks", "bench_spy"],
+    "crypto": ["tournament_crypto", "ml_crypto", "bench_btc"],
+}
 
 
 def _curves(path: Path, weekly: bool) -> dict:
@@ -64,10 +71,14 @@ def build(results: Path, site: Path):
         "generated_at": summary["generated_at"],
         "page": "https://poollaaneesh-rgb.github.io/paper-trader/",
         "live_start": summary["live"]["start"],
-        "live": {k: {f: v.get(f) for f in ("final_equity", "total_return", "days", "n_trades")}
-                 for k, v in summary["live"]["accounts"].items()},
-        "backtest": {k: {f: v.get(f) for f in ("final_equity", "total_return")}
-                     for k, v in summary["backtest"]["accounts"].items()},
+        "live": {
+            k: {f: v.get(f) for f in ("final_equity", "total_return", "days", "n_trades")}
+            for k, v in summary["live"]["accounts"].items()
+        },
+        "backtest": {
+            k: {f: v.get(f) for f in ("final_equity", "total_return")}
+            for k, v in summary["backtest"]["accounts"].items()
+        },
         "latest_trades": live_trades[:5],
         "skips": summary["live"].get("skips", [])[-3:],
     }

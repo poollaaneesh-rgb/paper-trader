@@ -1,4 +1,5 @@
 """Daily price panels. yfinance first; Coinbase public candles as the crypto fallback."""
+
 from __future__ import annotations
 
 import time
@@ -38,8 +39,9 @@ def _yfinance(tickers, start) -> dict[str, pd.DataFrame]:
 
     for attempt in range(3):
         try:
-            df = yf.download(list(tickers), start=start, auto_adjust=True, progress=False,
-                             group_by="column", threads=False)
+            df = yf.download(
+                list(tickers), start=start, auto_adjust=True, progress=False, group_by="column", threads=False
+            )
             if not df.empty:
                 out = {}
                 for field in ("Open", "Close", "Volume"):
@@ -61,9 +63,12 @@ def coinbase_candles(product: str, start) -> pd.DataFrame:
     rows = []
     while end > start:
         chunk_start = max(start, end - pd.Timedelta(days=299))
-        r = requests.get(url, params={"granularity": 86400, "start": chunk_start.isoformat(),
-                                      "end": end.isoformat()},
-                         headers={"User-Agent": "paper-trader"}, timeout=20)
+        r = requests.get(
+            url,
+            params={"granularity": 86400, "start": chunk_start.isoformat(), "end": end.isoformat()},
+            headers={"User-Agent": "paper-trader"},
+            timeout=20,
+        )
         if r.status_code != 200:
             break
         rows.extend(r.json())

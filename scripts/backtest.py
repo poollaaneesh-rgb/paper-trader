@@ -1,4 +1,5 @@
 """One-off walk-forward backtest, 2018-01-01 to 2026-09-30. Results are frozen in results/backtest/."""
+
 import json
 import sys
 import time
@@ -29,8 +30,11 @@ def frozen_panel(key, market):
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     panels = {k: frozen_panel(k, m) for k, m in MARKETS.items()}
-    equity, trades, summary = [], [], {"phase": "backtest", "start": BACKTEST_START, "end": BACKTEST_END,
-                                       "start_cash": START_CASH, "accounts": {}}
+    equity, trades, summary = (
+        [],
+        [],
+        {"phase": "backtest", "start": BACKTEST_START, "end": BACKTEST_END, "start_cash": START_CASH, "accounts": {}},
+    )
     for name, (mkey, kind) in engines.ACCOUNTS.items():
         t0 = time.time()
         market, panel = MARKETS[mkey], panels[mkey]
@@ -46,8 +50,10 @@ def main():
         summary["accounts"][name] = s
         equity.append(pd.DataFrame({"date": eq.index, "account": name, "equity": eq.round(2).to_numpy()}))
         trades.append(tr)
-        print(f"{name}: {s['final_equity']:.2f} ({s['total_return']:+.1%}), {s['n_trades']} trades, "
-              f"{time.time() - t0:.0f}s")
+        print(
+            f"{name}: {s['final_equity']:.2f} ({s['total_return']:+.1%}), {s['n_trades']} trades, "
+            f"{time.time() - t0:.0f}s"
+        )
     pd.concat(equity).to_csv(OUT / "equity.csv", index=False)
     pd.concat(trades).round(6).to_csv(OUT / "trades.csv", index=False)
     (OUT / "summary.json").write_text(json.dumps(summary, indent=2, default=str))

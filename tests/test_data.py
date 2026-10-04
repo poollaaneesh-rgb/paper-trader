@@ -1,4 +1,3 @@
-
 from paper_trader.data import complete_days
 from tests.conftest import make_panel
 

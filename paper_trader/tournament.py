@@ -1,4 +1,5 @@
 """Strategy tournament: capital shifts monthly toward the strategies that have been winning."""
+
 import numpy as np
 import pandas as pd
 

@@ -12,14 +12,36 @@ import numpy as np
 import pandas as pd
 
 TICKERS = {  # Yahoo -> Bloomberg
-    "SPY": "SPY US Equity", "QQQ": "QQQ US Equity", "IWM": "IWM US Equity", "TLT": "TLT US Equity",
-    "GLD": "GLD US Equity", "XLK": "XLK US Equity", "XLF": "XLF US Equity", "XLE": "XLE US Equity",
-    "XLV": "XLV US Equity", "XLY": "XLY US Equity", "AAPL": "AAPL US Equity", "MSFT": "MSFT US Equity",
-    "NVDA": "NVDA US Equity", "AMZN": "AMZN US Equity", "GOOGL": "GOOGL US Equity", "META": "META US Equity",
-    "BRK-B": "BRK/B US Equity", "JPM": "JPM US Equity", "V": "V US Equity", "UNH": "UNH US Equity",
-    "XOM": "XOM US Equity", "JNJ": "JNJ US Equity", "PG": "PG US Equity", "HD": "HD US Equity",
-    "COST": "COST US Equity", "AVGO": "AVGO US Equity", "LLY": "LLY US Equity", "WMT": "WMT US Equity",
-    "MA": "MA US Equity", "KO": "KO US Equity",
+    "SPY": "SPY US Equity",
+    "QQQ": "QQQ US Equity",
+    "IWM": "IWM US Equity",
+    "TLT": "TLT US Equity",
+    "GLD": "GLD US Equity",
+    "XLK": "XLK US Equity",
+    "XLF": "XLF US Equity",
+    "XLE": "XLE US Equity",
+    "XLV": "XLV US Equity",
+    "XLY": "XLY US Equity",
+    "AAPL": "AAPL US Equity",
+    "MSFT": "MSFT US Equity",
+    "NVDA": "NVDA US Equity",
+    "AMZN": "AMZN US Equity",
+    "GOOGL": "GOOGL US Equity",
+    "META": "META US Equity",
+    "BRK-B": "BRK/B US Equity",
+    "JPM": "JPM US Equity",
+    "V": "V US Equity",
+    "UNH": "UNH US Equity",
+    "XOM": "XOM US Equity",
+    "JNJ": "JNJ US Equity",
+    "PG": "PG US Equity",
+    "HD": "HD US Equity",
+    "COST": "COST US Equity",
+    "AVGO": "AVGO US Equity",
+    "LLY": "LLY US Equity",
+    "WMT": "WMT US Equity",
+    "MA": "MA US Equity",
+    "KO": "KO US Equity",
 }
 DATA_START, START, END = "2015-01-01", "2018-01-01", "2026-09-30"
 CASH, COST, MAX_POS, FLOOR, LOOKBACK = 400.0, 0.0005, 5, 0.10, 63
@@ -29,6 +51,7 @@ CASH, COST, MAX_POS, FLOOR, LOOKBACK = 400.0, 0.0005, 5, 0.10, 63
 def bloomberg_closes() -> pd.DataFrame:
     """Daily PX_LAST from BQL, one column per Yahoo ticker. Runs only inside BQuant."""
     import bql
+
     bq = bql.Service()
     item = bq.data.px_last(dates=bq.func.range(DATA_START, END), fill="prev")
     res = bq.execute(bql.Request(list(TICKERS.values()), {"close": item}))
@@ -41,6 +64,7 @@ def bloomberg_closes() -> pd.DataFrame:
 def yahoo_closes() -> pd.DataFrame:
     """The frozen Yahoo closes from the main backtest (local only)."""
     from pathlib import Path
+
     path = Path(__file__).resolve().parents[1] / "results" / "backtest" / "prices_stocks.csv.gz"
     df = pd.read_csv(path, header=[0, 1], index_col=0, parse_dates=True)
     return df["close"].loc[DATA_START:END].astype(float)
@@ -51,8 +75,10 @@ def check(close: pd.DataFrame) -> None:
     rets = close.pct_change(fill_method=None)
     big = rets.abs().stack()
     big = big[big > 0.35]
-    print(f"{close.shape[1]} tickers, {close.index.min().date()} to {close.index.max().date()}, "
-          f"{int(close.isna().sum().sum())} missing values")
+    print(
+        f"{close.shape[1]} tickers, {close.index.min().date()} to {close.index.max().date()}, "
+        f"{int(close.isna().sum().sum())} missing values"
+    )
     print("No suspicious jumps." if big.empty else f"Check these jumps (splits?):\n{big.head(20)}")
 
 
@@ -115,9 +141,12 @@ def run(close, weights):
 
 def score(eq):
     r = eq.pct_change().dropna()
-    return {"final": round(float(eq.iloc[-1]), 2), "return": f"{eq.iloc[-1] / CASH - 1:+.1%}",
-            "worst_drop": f"{(eq / eq.cummax() - 1).min():.1%}",
-            "sharpe": round(float(r.mean() / r.std() * np.sqrt(252)), 2)}
+    return {
+        "final": round(float(eq.iloc[-1]), 2),
+        "return": f"{eq.iloc[-1] / CASH - 1:+.1%}",
+        "worst_drop": f"{(eq / eq.cummax() - 1).min():.1%}",
+        "sharpe": round(float(r.mean() / r.std() * np.sqrt(252)), 2),
+    }
 
 
 def report(close, source):
@@ -131,6 +160,7 @@ def report(close, source):
 if __name__ == "__main__":
     try:
         import bql  # noqa: F401  (present only inside BQuant)
+
         report(bloomberg_closes(), "Bloomberg")
     except ImportError:
         report(yahoo_closes(), "Yahoo (frozen)")

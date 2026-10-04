@@ -1,4 +1,5 @@
 """Live paper trading: step each fake account through any new complete days since the last run."""
+
 from __future__ import annotations
 
 import pandas as pd
@@ -13,10 +14,20 @@ STALE_DAYS = {"stocks": 5, "crypto": 1}  # max calendar days between the last ca
 def init_state(accounts=None) -> dict:
     accounts = accounts or engines.ACCOUNTS
     decide = (pd.Timestamp(LIVE_START) - pd.Timedelta(days=1)).date().isoformat()
-    return {"accounts": {name: {"cash": START_CASH, "positions": {}, "avg_cost": {}, "pending": None,
-                                "last_date": decide, "initialised": False}
-                         for name in accounts},
-            "skips": []}
+    return {
+        "accounts": {
+            name: {
+                "cash": START_CASH,
+                "positions": {},
+                "avg_cost": {},
+                "pending": None,
+                "last_date": decide,
+                "initialised": False,
+            }
+            for name in accounts
+        },
+        "skips": [],
+    }
 
 
 def stale_reason(market_key: str, panel, today) -> str | None:
@@ -42,8 +53,9 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None):
         panel = panels.get(mkey)
         reason = stale_reason(mkey, panel, today)
         if reason:
-            state["skips"] = (state["skips"] + [{"run": str(pd.Timestamp(today).date()), "market": mkey,
-                                                 "reason": reason}])[-30:]
+            state["skips"] = (
+                state["skips"] + [{"run": str(pd.Timestamp(today).date()), "market": mkey, "reason": reason}]
+            )[-30:]
             continue
         for name, (akey, kind) in accounts.items():
             if akey != mkey:

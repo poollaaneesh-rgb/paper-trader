@@ -10,7 +10,6 @@ MKT = {"crypto": Market("crypto", ("AAA", "BBB", "CCC", "DDD"), "AAA", 0.005, 2)
 ACCTS = {"tournament_crypto": ("crypto", "tournament"), "bench_btc": ("crypto", "bench")}
 
 
-
 def test_initialises_and_is_idempotent(monkeypatch):
     monkeypatch.setattr(live, "LIVE_START", "2026-10-01")
     p = make_panel(n_days=2650, freq="D")  # 2020-01-01 .. 2027-04

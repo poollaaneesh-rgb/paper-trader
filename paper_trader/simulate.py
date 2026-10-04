@@ -1,4 +1,5 @@
 """Step an account through the days: decisions made at close t fill at the open of t+1."""
+
 from __future__ import annotations
 
 import pandas as pd
@@ -6,8 +7,9 @@ import pandas as pd
 from paper_trader.portfolio import Account
 
 
-def step(account: Account, day, panel, target: pd.Series | None, cost_rate: float,
-         avg_cost: dict | None = None) -> list[dict]:
+def step(
+    account: Account, day, panel, target: pd.Series | None, cost_rate: float, avg_cost: dict | None = None
+) -> list[dict]:
     """Fill a pending target at `day`'s open. `None` (or an all-NaN row) means hold."""
     if target is None or target.isna().all():
         return []
@@ -27,14 +29,23 @@ def step(account: Account, day, panel, target: pd.Series | None, cost_rate: floa
             held_before = account.positions[t.ticker] - t.units
             basis = avg_cost.get(t.ticker, 0.0)
             avg_cost[t.ticker] = (basis * held_before + t.price * t.units + t.cost) / account.positions[t.ticker]
-        rows.append({"date": day, "ticker": t.ticker, "side": "buy" if t.units > 0 else "sell",
-                     "units": abs(t.units), "price": t.price, "value": abs(t.units) * t.price,
-                     "cost": t.cost, "realized_pnl": pnl})
+        rows.append(
+            {
+                "date": day,
+                "ticker": t.ticker,
+                "side": "buy" if t.units > 0 else "sell",
+                "units": abs(t.units),
+                "price": t.price,
+                "value": abs(t.units) * t.price,
+                "cost": t.cost,
+                "realized_pnl": pnl,
+            }
+        )
     return rows
 
 
 def mark(account: Account, day, panel) -> float:
-    closes = panel.close.loc[:pd.Timestamp(day)].ffill().iloc[-1]
+    closes = panel.close.loc[: pd.Timestamp(day)].ffill().iloc[-1]
     return account.equity(closes)
 
 

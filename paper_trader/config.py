@@ -1,4 +1,5 @@
 """Universes, costs and dates. Fake money only: nothing here talks to a broker."""
+
 from dataclasses import dataclass
 
 START_CASH = 400.0
@@ -24,9 +25,36 @@ class Market:
 STOCKS = Market(
     name="stocks",
     tickers=(
-        "SPY", "QQQ", "IWM", "TLT", "GLD", "XLK", "XLF", "XLE", "XLV", "XLY",
-        "AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "META", "BRK-B", "JPM", "V", "UNH",
-        "XOM", "JNJ", "PG", "HD", "COST", "AVGO", "LLY", "WMT", "MA", "KO",
+        "SPY",
+        "QQQ",
+        "IWM",
+        "TLT",
+        "GLD",
+        "XLK",
+        "XLF",
+        "XLE",
+        "XLV",
+        "XLY",
+        "AAPL",
+        "MSFT",
+        "NVDA",
+        "AMZN",
+        "GOOGL",
+        "META",
+        "BRK-B",
+        "JPM",
+        "V",
+        "UNH",
+        "XOM",
+        "JNJ",
+        "PG",
+        "HD",
+        "COST",
+        "AVGO",
+        "LLY",
+        "WMT",
+        "MA",
+        "KO",
     ),
     benchmark="SPY",
     cost_rate=SLIPPAGE,

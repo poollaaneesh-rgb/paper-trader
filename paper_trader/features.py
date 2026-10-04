@@ -1,4 +1,5 @@
 """Per-asset daily features, all computed from data up to that day's close."""
+
 import pandas as pd
 
 from paper_trader.strategies import rsi
