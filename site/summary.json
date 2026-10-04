@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-03T09:34+00:00",
+ "generated_at": "2026-10-04T10:22+00:00",
  "page": "https://poollaaneesh-rgb.github.io/paper-trader/",
  "live_start": "2026-10-01",
  "live": {
@@ -10,10 +10,10 @@
    "n_trades": 28
   },
   "tournament_crypto": {
-   "final_equity": 398.41,
-   "total_return": -0.003974999999999951,
-   "days": 3,
-   "n_trades": 11
+   "final_equity": 399.73,
+   "total_return": -0.0006749999999999812,
+   "days": 4,
+   "n_trades": 12
   },
   "ml_stocks": {
    "final_equity": 400.32,
@@ -22,10 +22,10 @@
    "n_trades": 7
   },
   "ml_crypto": {
-   "final_equity": 400.3,
-   "total_return": 0.0007500000000000284,
-   "days": 3,
-   "n_trades": 2
+   "final_equity": 399.98,
+   "total_return": -4.999999999999449e-05,
+   "days": 4,
+   "n_trades": 3
   },
   "bench_spy": {
    "final_equity": 402.56,
@@ -34,9 +34,9 @@
    "n_trades": 1
   },
   "bench_btc": {
-   "final_equity": 401.98,
-   "total_return": 0.00495000000000001,
-   "days": 3,
+   "final_equity": 403.25,
+   "total_return": 0.008124999999999938,
+   "days": 4,
    "n_trades": 1
   }
  },
@@ -68,30 +68,30 @@
  },
  "latest_trades": [
   {
-   "date": "2026-10-02",
+   "date": "2026-10-03",
+   "account": "ml_crypto",
+   "side": "buy",
+   "ticker": "BTC-USD",
+   "value": 132.7,
+   "reason": "model gives 59% odds of a rise (threshold 55%)",
+   "phase": "live paper"
+  },
+  {
+   "date": "2026-10-03",
    "account": "tournament_crypto",
    "side": "buy",
-   "ticker": "ADA-USD",
-   "value": 11.67,
-   "reason": "momentum wants 11% (3-mo return +54.5%); trend wants 4% (+14.6% vs 50-day avg)",
+   "ticker": "ETH-USD",
+   "value": 4.04,
+   "reason": "momentum wants 11% (3-mo return +37.6%); trend wants 4% (+8.1% vs 50-day avg)",
    "phase": "live paper"
   },
   {
    "date": "2026-10-02",
    "account": "ml_stocks",
    "side": "buy",
-   "ticker": "XLV",
+   "ticker": "V",
    "value": 80.1,
    "reason": "model gives 55% odds of a rise (threshold 55%)",
-   "phase": "live paper"
-  },
-  {
-   "date": "2026-10-02",
-   "account": "tournament_crypto",
-   "side": "buy",
-   "ticker": "BNB-USD",
-   "value": 7.36,
-   "reason": "trend wants 4% (+7.9% vs 50-day avg)",
    "phase": "live paper"
   },
   {

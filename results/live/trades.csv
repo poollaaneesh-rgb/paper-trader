@@ -49,3 +49,5 @@ date,ticker,side,units,price,value,cost,realized_pnl,reason,account
 2026-10-02,XRP-USD,buy,5.00721120021031,1.494027018547058,7.480908820685647,0.04114499851377105,,trend wants 4% (+9.3% vs 50-day avg),tournament_crypto
 2026-10-02,BNB-USD,buy,0.009549799288302565,771.189453125,7.3647044905995696,0.04050587469829763,,trend wants 4% (+7.9% vs 50-day avg),tournament_crypto
 2026-10-02,ADA-USD,buy,47.4017293401436,0.24625800549983978,11.673055324547,0.0642018042850085,,momentum wants 11% (3-mo return +54.5%); trend wants 4% (+14.6% vs 50-day avg),tournament_crypto
+2026-10-03,ETH-USD,buy,0.0015121173533995914,2668.448486328125,4.03500726282963,0.022192539945562965,,momentum wants 11% (3-mo return +37.6%); trend wants 4% (+8.1% vs 50-day avg),tournament_crypto
+2026-10-03,BTC-USD,buy,0.0015703896325383018,84503.1875,132.70292956644022,0.7298661126154211,,model gives 59% odds of a rise (threshold 55%),ml_crypto
