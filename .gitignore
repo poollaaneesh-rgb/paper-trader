@@ -1,5 +1,12 @@
 .venv/
 __pycache__/
 .pytest_cache/
+.ruff_cache/
 *.pyc
+*.egg-info/
 .cache/
+.coverage
+.env
+.DS_Store
+# Built by scripts/run_daily.py and deployed to GitHub Pages; not part of the source.
+site/

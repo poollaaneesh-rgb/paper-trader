@@ -2,13 +2,8 @@ name: Daily paper trade
 
 on:
   schedule:
-    - cron: "0 4 * * *"   # 9 PM Arizona (UTC-7, no daylight saving)
+    - cron: "17 4 * * *"   # about 9:17 PM Arizona (UTC-7); off the top of the hour, when GitHub delays fewer jobs
   workflow_dispatch:
-
-permissions:
-  contents: write
-  pages: write
-  id-token: write
 
 concurrency:
   group: daily
@@ -17,6 +12,8 @@ concurrency:
 jobs:
   trade:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # commits the live record
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -26,19 +23,26 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python -m pytest -q
       - run: python scripts/run_daily.py
-      - name: Commit results
+      - name: Commit the live record
         run: |
           git config user.name "paper-trader-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add results site
-          git diff --cached --quiet || git commit -m "Daily run $(date -u +%F)"
-          git push
-      - uses: actions/configure-pages@v5
+          git add results
+          git diff --cached --quiet results/live || { git commit -m "Daily run $(date -u +%F)" && git pull --rebase && git push; }
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
-      - id: deploy
-        uses: actions/deploy-pages@v4
+
+  deploy:
+    needs: trade
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+      - id: deploy
+        uses: actions/deploy-pages@v4
