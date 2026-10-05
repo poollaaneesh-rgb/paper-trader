@@ -26,9 +26,18 @@ def final_value(returns: pd.Series) -> float:
 
 
 def equal_weight(panel, cost_rate: float) -> float:
+    """Every name with a price, equal weight, rebalanced daily, costs charged."""
     avail = panel.close.notna().astype(float)
     w = avail.div(avail.sum(axis=1).replace(0, np.nan), axis=0).fillna(0.0)
     return final_value(selftune.net_returns(w, panel, cost_rate))
+
+
+def equal_weight_hold(panel) -> float:
+    """Buy every name that had a price on the first backtest day, equal amounts, and never trade again."""
+    opens = panel.open.loc[BACKTEST_START:BACKTEST_END]
+    first = opens.iloc[0].dropna()
+    last = panel.close.loc[:BACKTEST_END].ffill().iloc[-1]
+    return float(START_CASH * (last[first.index] / first).mean())
 
 
 def shuffled(panel, probs: pd.DataFrame, max_positions: int, cost_rate: float, seed: int) -> float:
@@ -51,7 +60,8 @@ def main():
             round(shuffled(panel, probs, market.max_positions, market.cost_rate, s), 2) for s in range(1, SHUFFLES + 1)
         ]
         out[key] = {
-            "equal_weight_hold": round(equal_weight(panel, market.cost_rate), 2),
+            "equal_weight_hold": round(equal_weight_hold(panel), 2),
+            "equal_weight_daily": round(equal_weight(panel, market.cost_rate), 2),
             "shuffled_ml_selftuned": runs,
             "shuffled_ml_median": round(float(np.median(runs)), 2),
         }

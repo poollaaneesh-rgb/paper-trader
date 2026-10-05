@@ -5,76 +5,146 @@
   "start_cash": 400.0,
   "accounts": {
     "tournament_stocks": {
+      "final_equity": 1496.53,
+      "total_return": 2.741319478482591,
+      "max_drawdown": -0.2298664142836182,
+      "sharpe": 1.0255323316140166,
+      "win_rate": 0.5285303466020886,
+      "n_trades": 13100,
+      "days": 2198,
+      "market": "stocks",
+      "engine": "tournament",
+      "diagnostics": {
+        "variant": "tour:default-21-M-net",
+        "switches": 41,
+        "time_in_variants": {
+          "tour:slow-126-W-net": 0.152,
+          "tour:default-21-M-net": 0.152,
+          "tour:slow-21-D-net": 0.1,
+          "tour:slow-252-M-net": 0.096,
+          "tour:default-252-M-net": 0.073
+        }
+      }
+    },
+    "tournament_stocks_fixed": {
       "final_equity": 1254.68,
       "total_return": 2.1367051802811132,
-      "max_drawdown": -0.2529969672117708,
-      "sharpe": 0.9115469108825548,
+      "max_drawdown": -0.25299696721177123,
+      "sharpe": 0.9115469108825566,
       "win_rate": 0.5225826478348595,
       "n_trades": 12830,
       "days": 2198,
       "market": "stocks",
+      "engine": "tournament_fixed"
+    },
+    "tournament_crypto": {
+      "final_equity": 2671.26,
+      "total_return": 5.6781591757868854,
+      "max_drawdown": -0.7204008150328325,
+      "sharpe": 0.682659804627511,
+      "win_rate": 0.5048148148148148,
+      "n_trades": 5308,
+      "days": 3194,
+      "market": "crypto",
       "engine": "tournament",
       "diagnostics": {
-        "allocations": {
-          "momentum": 0.1,
-          "mean_reversion": 0.8,
-          "trend": 0.1
+        "variant": "tour:default-21-D-net",
+        "switches": 115,
+        "time_in_variants": {
+          "tour:slow-21-W-net": 0.165,
+          "tour:slow-252-M-net": 0.082,
+          "tour:fast-126-M-net": 0.075,
+          "tour:fast-126-W-net": 0.062,
+          "tour:default-252-D-net": 0.057
         }
       }
     },
-    "tournament_crypto": {
+    "tournament_crypto_fixed": {
       "final_equity": 249.59,
-      "total_return": -0.3760194796758607,
-      "max_drawdown": -0.8313158157240601,
-      "sharpe": 0.15122043594093496,
+      "total_return": -0.376019479675861,
+      "max_drawdown": -0.8313158157240602,
+      "sharpe": 0.1512204359409349,
       "win_rate": 0.48396880415944543,
       "n_trades": 4571,
       "days": 3194,
       "market": "crypto",
-      "engine": "tournament",
-      "diagnostics": {
-        "allocations": {
-          "momentum": 0.353,
-          "mean_reversion": 0.547,
-          "trend": 0.1
-        }
-      }
+      "engine": "tournament_fixed"
     },
     "ml_stocks": {
-      "final_equity": 597.35,
-      "total_return": 0.4933799868073363,
-      "max_drawdown": -0.42251571219956463,
-      "sharpe": 0.3148309528833866,
-      "win_rate": 0.5392611546457701,
-      "n_trades": 12549,
+      "final_equity": 2256.19,
+      "total_return": 4.640469354505469,
+      "max_drawdown": -0.264529623287174,
+      "sharpe": 1.1330320411487789,
+      "win_rate": 0.648870636550308,
+      "n_trades": 1977,
       "days": 2198,
       "market": "stocks",
       "engine": "ml",
       "diagnostics": {
-        "retrains": 458,
-        "hgb_hit_rate": 0.5319,
-        "lr_hit_rate": 0.5329,
-        "predictions_scored": 65910,
-        "up_rate": 0.5348
+        "variant": "ml:in52-out52-hold5",
+        "switches": 72,
+        "retrains": 510,
+        "hgb_hit_rate": 0.5339,
+        "lr_hit_rate": 0.5355,
+        "predictions_scored": 73470,
+        "up_rate": 0.5384,
+        "time_in_variants": {
+          "ml:in55-out55-hold10": 0.198,
+          "ml:in58-out51-hold10": 0.109,
+          "ml:in58-out51-hold1": 0.097,
+          "ml:in55-out48-hold10": 0.093,
+          "ml:in58-out55-hold5": 0.054
+        }
       }
     },
+    "ml_stocks_fixed": {
+      "final_equity": 597.35,
+      "total_return": 0.49337998680734163,
+      "max_drawdown": -0.4225157121995633,
+      "sharpe": 0.3148309528833888,
+      "win_rate": 0.5392611546457701,
+      "n_trades": 12549,
+      "days": 2198,
+      "market": "stocks",
+      "engine": "ml_fixed"
+    },
     "ml_crypto": {
-      "final_equity": 2.75,
-      "total_return": -0.9931347741867137,
-      "max_drawdown": -0.9933556237963166,
-      "sharpe": -0.8193829429585725,
-      "win_rate": 0.43366029943211154,
-      "n_trades": 3891,
+      "final_equity": 9760.99,
+      "total_return": 23.40247640226588,
+      "max_drawdown": -0.8127021931050782,
+      "sharpe": 0.9254137010286059,
+      "win_rate": 0.6092925026399155,
+      "n_trades": 1913,
       "days": 3194,
       "market": "crypto",
       "engine": "ml",
       "diagnostics": {
-        "retrains": 458,
-        "hgb_hit_rate": 0.5219,
-        "lr_hit_rate": 0.5186,
-        "predictions_scored": 17540,
-        "up_rate": 0.5032
+        "variant": "ml:in58-out51-hold10",
+        "switches": 147,
+        "retrains": 494,
+        "hgb_hit_rate": 0.5218,
+        "lr_hit_rate": 0.5201,
+        "predictions_scored": 17792,
+        "up_rate": 0.5049,
+        "time_in_variants": {
+          "ml:cash": 0.246,
+          "ml:in52-out45-hold10": 0.13,
+          "ml:in55-out48-hold5": 0.068,
+          "ml:in52-out52-hold10": 0.064,
+          "ml:in52-out49-hold10": 0.057
+        }
       }
+    },
+    "ml_crypto_fixed": {
+      "final_equity": 2.75,
+      "total_return": -0.9931347741867137,
+      "max_drawdown": -0.9933556237963166,
+      "sharpe": -0.819382942958572,
+      "win_rate": 0.43366029943211154,
+      "n_trades": 3891,
+      "days": 3194,
+      "market": "crypto",
+      "engine": "ml_fixed"
     },
     "bench_spy": {
       "final_equity": 1299.9,

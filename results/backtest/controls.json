@@ -1,0 +1,26 @@
+{
+  "stocks": {
+    "equal_weight_hold": 2347.68,
+    "equal_weight_daily": 1919.36,
+    "shuffled_ml_selftuned": [
+      1862.17,
+      2391.11,
+      1510.6,
+      1031.76,
+      1277.01
+    ],
+    "shuffled_ml_median": 1510.6
+  },
+  "crypto": {
+    "equal_weight_hold": 7864.32,
+    "equal_weight_daily": 7072.95,
+    "shuffled_ml_selftuned": [
+      1794.24,
+      953.75,
+      1261.54,
+      735.25,
+      2261.38
+    ],
+    "shuffled_ml_median": 1261.54
+  }
+}

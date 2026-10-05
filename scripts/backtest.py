@@ -74,7 +74,11 @@ def main():
             diag.pop("probs").to_csv(OUT / f"ml_probs_{mkey}.csv.gz")
         summary["accounts"][name]["diagnostics"] = diag
     pd.concat(equity).to_csv(OUT / "equity.csv", index=False)
-    pd.concat(trades).round(6).to_csv(OUT / "trades.csv", index=False)
+    # Only the fixed accounts' equity curves are shown, so their trades stay out of the file to keep it lean.
+    all_trades = pd.concat(trades)
+    all_trades[~all_trades["account"].str.endswith("_fixed")].to_csv(
+        OUT / "trades.csv", index=False, float_format="%.6f"
+    )
     (OUT / "summary.json").write_text(json.dumps(summary, indent=2, default=str))
 
 
