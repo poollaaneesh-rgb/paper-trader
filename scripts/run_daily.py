@@ -24,10 +24,24 @@ def _append(path: Path, rows: list[dict]):
     df.to_csv(path, mode="a", header=not path.exists(), index=False)
 
 
+def settings_summary() -> dict:
+    """Each account's current setting and the log of changes, from results/live/settings.csv."""
+    path = LIVE / "settings.csv"
+    if not path.exists():
+        return {"current": {}, "changes": []}
+    rows = pd.read_csv(path).sort_values("date")
+    current = {
+        r["account"]: {"variant": r["variant"], "description": r["description"], "since": r["date"]}
+        for r in rows.to_dict("records")
+    }
+    return {"current": current, "changes": rows.iloc[::-1].head(20).to_dict("records")}
+
+
 def live_summary(skips) -> dict:
     eq = pd.read_csv(LIVE / "equity.csv", parse_dates=["date"]) if (LIVE / "equity.csv").exists() else None
     tr = pd.read_csv(LIVE / "trades.csv") if (LIVE / "trades.csv").exists() else pd.DataFrame()
     out = {"phase": "live paper", "start": LIVE_START, "start_cash": START_CASH, "accounts": {}, "skips": skips}
+    out["settings"] = settings_summary()
     for name, (mkey, kind) in engines.ACCOUNTS.items():
         series = eq[eq.account == name].set_index("date")["equity"] if eq is not None else pd.Series(dtype=float)
         trades = tr[tr.account == name] if len(tr) else pd.DataFrame(columns=["realized_pnl"])
@@ -49,9 +63,10 @@ def main():
         except Exception as exc:  # a failed source skips that market; it never trades on bad data
             print(f"{k}: fetch failed: {exc}")
             panels[k] = None
-    state, eq_rows, trade_rows = live.run(state, panels, today)
+    state, eq_rows, trade_rows, setting_rows = live.run(state, panels, today)
     _append(LIVE / "equity.csv", eq_rows)
     _append(LIVE / "trades.csv", trade_rows)
+    _append(LIVE / "settings.csv", setting_rows)
     state_path.write_text(json.dumps(state, indent=2, default=str))
     backtest = json.loads((RES / "backtest" / "summary.json").read_text())
     summary = {
@@ -61,7 +76,7 @@ def main():
     }
     (RES / "summary.json").write_text(json.dumps(summary, indent=2, default=str))
     report.build(RES, ROOT / "site")
-    print(f"processed {len(eq_rows)} account-days, {len(trade_rows)} trades")
+    print(f"processed {len(eq_rows)} account-days, {len(trade_rows)} trades, {len(setting_rows)} setting changes")
 
 
 if __name__ == "__main__":

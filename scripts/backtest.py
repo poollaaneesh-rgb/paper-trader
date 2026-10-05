@@ -1,4 +1,7 @@
-"""One-off walk-forward backtest, 2018-01-01 to 2026-09-30. Results are frozen in results/backtest/."""
+"""One-off walk-forward backtest, 2018-01-01 to 2026-09-30. Results are frozen in results/backtest/.
+
+Each self-tuning account is simulated twice: as it runs (following its menu) and on its original fixed rules, so
+the two can be compared on the same prices. The model's odds are saved for scripts/controls.py."""
 
 import json
 import sys
@@ -38,22 +41,38 @@ def main():
     for name, (mkey, kind) in engines.ACCOUNTS.items():
         t0 = time.time()
         market, panel = MARKETS[mkey], panels[mkey]
-        w, explain, diag = engines.targets(kind, market, panel, BACKTEST_START)
-        eq, tr, _ = simulate.run(panel, w, BACKTEST_START, BACKTEST_END, START_CASH, market.cost_rate)
-        tr = engines.attach_reasons(tr, panel, explain).assign(account=name)
         periods = 252 if mkey == "stocks" else 365
-        s = metrics.summary(eq, tr, periods, START_CASH)
-        s.update({"market": mkey, "engine": kind})
-        if "allocation_history" in diag:
-            diag.pop("allocation_history").to_csv(OUT / f"{name}_allocations.csv")
-        s["diagnostics"] = diag
-        summary["accounts"][name] = s
-        equity.append(pd.DataFrame({"date": eq.index, "account": name, "equity": eq.round(2).to_numpy()}))
-        trades.append(tr)
-        print(
-            f"{name}: {s['final_equity']:.2f} ({s['total_return']:+.1%}), {s['n_trades']} trades, "
-            f"{time.time() - t0:.0f}s"
-        )
+        w, explain, diag = engines.targets(kind, market, panel, BACKTEST_START)
+        runs = [(name, kind, w, explain)]
+        if "fixed_weights" in diag:
+            runs.append(
+                (
+                    f"{name}_fixed",
+                    f"{kind}_fixed",
+                    diag.pop("fixed_weights"),
+                    lambda d, t, side: "the original fixed rules",
+                )
+            )
+        for acct, engine, weights, why in runs:
+            eq, tr, _ = simulate.run(panel, weights, BACKTEST_START, BACKTEST_END, START_CASH, market.cost_rate)
+            tr = engines.attach_reasons(tr, panel, why).assign(account=acct)
+            s = metrics.summary(eq, tr, periods, START_CASH)
+            s.update({"market": mkey, "engine": engine})
+            summary["accounts"][acct] = s
+            equity.append(pd.DataFrame({"date": eq.index, "account": acct, "equity": eq.round(2).to_numpy()}))
+            trades.append(tr)
+            took = f"{time.time() - t0:.0f}s"
+            print(f"{acct}: {s['final_equity']:.2f} ({s['total_return']:+.1%}), {s['n_trades']} trades, {took}")
+        if "chosen" in diag:
+            chosen = diag.pop("chosen").loc[BACKTEST_START:BACKTEST_END]
+            chosen.rename("variant").to_csv(OUT / f"{name}_variants.csv", index_label="date")
+            diag["time_in_variants"] = {
+                k: round(float(v), 3) for k, v in chosen.value_counts(normalize=True).head(5).items()
+            }
+        diag.pop("scores", None)
+        if "probs" in diag:
+            diag.pop("probs").to_csv(OUT / f"ml_probs_{mkey}.csv.gz")
+        summary["accounts"][name]["diagnostics"] = diag
     pd.concat(equity).to_csv(OUT / "equity.csv", index=False)
     pd.concat(trades).round(6).to_csv(OUT / "trades.csv", index=False)
     (OUT / "summary.json").write_text(json.dumps(summary, indent=2, default=str))

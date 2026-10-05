@@ -98,6 +98,14 @@ _SPEED = {"default": "the original strategies", "slow": "slower strategies", "fa
 
 
 def describe(variant_id: str) -> str:
+    """Plain English for a variant id; an id the menus never issued is returned as it is."""
+    try:
+        return _describe(variant_id)
+    except (ValueError, KeyError):
+        return variant_id
+
+
+def _describe(variant_id: str) -> str:
     kind, _, rest = variant_id.partition(":")
     if variant_id == ML_FIXED:
         return "the original rule: the top names above 55% odds, re-ranked every day"

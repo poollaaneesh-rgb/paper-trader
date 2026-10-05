@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from paper_trader import engines, simulate
+from paper_trader import engines, selftune, simulate, variants
 from paper_trader.config import LIVE_START, MARKETS, START_CASH
 from paper_trader.portfolio import Account
 
@@ -23,6 +23,7 @@ def init_state(accounts=None) -> dict:
                 "pending": None,
                 "last_date": decide,
                 "initialised": False,
+                "variant": None,  # the self-tuning layer's current setting, once it has run
             }
             for name in accounts
         },
@@ -44,11 +45,33 @@ def _series(d: dict | None):
     return None if d is None else pd.Series(d, dtype=float)
 
 
+def _setting_change(a: dict, name: str, d, diag: dict) -> dict | None:
+    """A settings row when the variant chosen at close `d` differs from the one on record, else None."""
+    chosen = diag.get("chosen")
+    if chosen is None or d not in chosen.index:
+        return None
+    vid, prev = chosen.loc[d], a.get("variant")
+    if vid == prev:
+        return None
+    if prev is None:
+        reason = "first run of the self-tuning layer"
+    else:
+        s = diag["scores"]
+        lead = float(s.at[d, vid] - s.at[d, prev]) if prev in s.columns else float("nan")
+        window = selftune.WINDOW
+        reason = f"ahead of the previous setting by {lead * 100:.1f}% over {window} trading days, after costs"
+    a["variant"] = vid
+    return {"date": d, "account": name, "variant": vid, "description": variants.describe(vid), "reason": reason}
+
+
 def run(state: dict, panels: dict, today, markets=None, accounts=None):
-    """Advance every account. Returns (state, equity rows, trade rows). Re-running on the same data is a no-op."""
+    """Advance every account. Returns (state, equity rows, trade rows, settings rows).
+
+    Re-running on the same data is a no-op.
+    """
     markets = markets or MARKETS
     accounts = accounts or engines.ACCOUNTS
-    eq_rows, trade_rows = [], []
+    eq_rows, trade_rows, setting_rows = [], [], []
     for mkey, market in markets.items():
         panel = panels.get(mkey)
         reason = stale_reason(mkey, panel, today)
@@ -67,13 +90,16 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None):
             new_days = panel.dates[(panel.dates > pd.Timestamp(a["last_date"])) & (panel.dates >= start)]
             if len(new_days) == 0:
                 continue
-            w, explain, _ = engines.targets(kind, market, panel, LIVE_START)
+            w, explain, diag = engines.targets(kind, market, panel, LIVE_START)
             if not a["initialised"]:
                 decide = panel.dates[panel.dates < start][-1]
                 row = w.loc[decide]
                 a["pending"] = None if row.isna().all() else row.fillna(0.0).to_dict()
                 a["initialised"] = True
                 a["last_date"] = decide.date().isoformat()
+                change = _setting_change(a, name, decide, diag)
+                if change:
+                    setting_rows.append(change)
             acct = Account(cash=a["cash"], positions=dict(a["positions"]))
             avg_cost = dict(a["avg_cost"])
             for d in new_days:
@@ -85,5 +111,8 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None):
                 row = w.loc[d] if d in w.index else None
                 a["pending"] = None if row is None or row.isna().all() else row.fillna(0.0).to_dict()
                 a["last_date"] = d.date().isoformat()
+                change = _setting_change(a, name, d, diag)
+                if change:
+                    setting_rows.append(change)
             a["cash"], a["positions"], a["avg_cost"] = acct.cash, acct.positions, avg_cost
-    return state, eq_rows, trade_rows
+    return state, eq_rows, trade_rows, setting_rows
