@@ -1,0 +1,5 @@
+date,account,variant,description,reason
+2026-10-05,tournament_stocks,tour:default-21-M-net,"the original strategies, capital re-weighted monthly by the last 21 days after costs",first run of the self-tuning layer
+2026-10-05,ml_stocks,ml:in55-out55-hold10,"enter above 55% odds, exit below 55%, hold at least 10 days",first run of the self-tuning layer
+2026-10-05,tournament_crypto,tour:default-21-D-net,"the original strategies, capital re-weighted daily by the last 21 days after costs",first run of the self-tuning layer
+2026-10-05,ml_crypto,ml:in52-out45-hold5,"enter above 52% odds, exit below 45%, hold at least 5 days",first run of the self-tuning layer
