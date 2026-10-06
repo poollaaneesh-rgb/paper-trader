@@ -2,7 +2,7 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Paper Trader</title>
-<meta name="description" content="A strategy tournament and a weekly-retrained ML model each trade $400 of fake money, every day, against buy-and-hold.">
+<meta name="description" content="A strategy tournament and a weekly-retrained ML model each trade $400 of fake money, every day, against buy-and-hold, and tune their own settings on evidence.">
 <style>
 :root{--bg:#ffffff;--ink:#15181e;--ink2:#4a5060;--muted:#6b7280;--line:#e3e5ea;--navy:#0b2545;--red:#c8102e;
 --s1:#1c5cab;--s2:#eb6834;--ref:#6b7280}
@@ -44,9 +44,16 @@ footer{margin-top:56px;font-size:12px;color:var(--muted);border-top:1px solid va
 <p class="label" id="live-since"></p>
 <div id="live"></div>
 
+<h2>Settings the bots chose</h2>
+<p class="label">Each bot reviews a menu of settings every night and follows the one that has led after costs</p>
+<div id="settings"></div>
+
 <h2>Backtest</h2>
 <p class="label">Walk-forward, Jan 2018 to Sep 2026 · fees and slippage included · weekly points</p>
 <div id="backtest"></div>
+<h3>Self-tuning against its own controls</h3>
+<div class="scroll"><table id="controls"><thead><tr><th>Account</th><th>Original rules</th><th>Self-tuned</th><th>Index held</th><th>Universe held equally</th><th>No-skill control</th></tr></thead><tbody></tbody></table></div>
+<p class="meta" id="controls-note"></p>
 
 <h2>Latest decisions</h2>
 <p class="label" id="trades-label"></p>
@@ -58,7 +65,9 @@ footer{margin-top:56px;font-size:12px;color:var(--muted);border-top:1px solid va
 <li><b>ML model.</b> Gradient-boosted trees on nine price features (returns over 1 to 60 days, volatility, RSI, distance from moving averages, volume change) predict whether each asset rises over the next holding day. Retrained every week on data up to two days before, then holds the top picks above 55% odds. A logistic regression runs alongside as a sanity check.</li>
 <li><b>No look-ahead.</b> Decisions use data up to the close; orders fill at the next day's open. Automated tests truncate the data and check that no past decision changes.</li>
 <li><b>Costs.</b> Stocks pay 0.05% slippage per trade; crypto pays 0.5% fees plus slippage.</li>
+<li><b>Self-tuning (since Oct 6, 2026).</b> Each engine keeps a menu of settings: for the ML model, how its odds become positions (an entry line from 52% to 62%, an exit line below it, a minimum hold of 1 to 10 days, or sitting in cash); for the tournament, slower and faster strategy settings, a 21 to 252 day lookback, monthly, weekly or daily re-weighting, scored after costs. Every setting runs as a shadow account on the same prices. Each night the bot scores them on the last 126 trading days after costs and moves to the leader only when it is ahead by 2%. The menu and the three numbers were fixed before any result was seen, and the layer is a function of prices alone, so the no-look-ahead tests cover it. On the 2018 to 2026 prices it switched every 3 to 11 weeks.</li>
 <li><b>Fees decide the ML result.</b> The ML model trades a lot: it turns over about 57% of the stock account and 24% of the crypto account every day. In the backtest the stock model ends at $2,083 with no fees, $597 with the real 0.05% and $171 at 0.1%. The crypto model would have reached $3,620 with no fees and ends at $2.75 after its 0.55% per trade. Its daily up/down calls are right about 52 to 53% of the time, close to how often prices simply rise. Two downloads of the same prices that differed by one part in a million moved the stock result between $484 and $965, so the backtest prices are frozen in the repo to make these numbers reproducible.</li>
+<li><b>What the self-tuning test does not show.</b> Most of its gain over the original rules is fees saved by trading less. None of the four accounts beat simply holding its own universe at equal weight, and a no-skill control (the model's picks shuffled across names each day, same machinery) reproduces much of the stock result. The outcome also swings widely with the layer's own settings, the mark of a fragile result. The menu was chosen knowing fees were the problem, so this is still a backtest.</li>
 <li><b>Known limits.</b> The universe is today's large companies and coins, which flatters any backtest (survivorship bias). Only the live paper record is real evidence.</li>
 </ul>
 <footer>Fake money only. This is a research project, not investment advice, and it is not connected to any brokerage. Code: <a href="https://github.com/poollaaneesh-rgb/paper-trader">github.com/poollaaneesh-rgb/paper-trader</a></footer>
@@ -134,7 +143,12 @@ function section(rootId, block, curves, phase) {
       html += '<p class="empty">No complete trading days yet. The first fills happen at the open on ' + liveStart + '; results appear after that day closes.</p>';
       root.insertAdjacentHTML('beforeend', html); continue;
     }
-    const v = verdict(accts, market);
+    let v = verdict(accts, market);
+    const ew = D.controls && D.controls[market] && D.controls[market].equal_weight_hold;
+    if (v && phase === 'backtest' && ew) {
+      const beatEw = names.slice(0, 2).filter(n => accts[n] && accts[n].final_equity > ew).length;
+      v += beatEw === 0 ? ' Neither beat holding the universe itself at equal weight (' + money(ew) + ').' : beatEw === 1 ? ' One of the two beat holding the universe itself at equal weight (' + money(ew) + ').' : '';
+    }
     if (v) html += '<p class="point">' + esc(v) + '</p>';
     html += '<div class="grid">' + names.map(n => '<div class="stat"><div class="label">' + esc(D.labels[n]) + '</div><div class="v">' + money(accts[n].final_equity) + '</div><div class="s">' + pct(accts[n].total_return) + ' from $400</div></div>').join('') + '</div>';
     const id = rootId + '-' + market;
@@ -151,6 +165,34 @@ function section(rootId, block, curves, phase) {
 }
 section('live', live, D.live_curves, 'live');
 section('backtest', bt, D.backtest_curves, 'backtest');
+// Settings the self-tuning layer chose for each live account, and the log of changes.
+(function settings() {
+  const S = live.settings || {current: {}, changes: []};
+  const root = document.getElementById('settings');
+  const names = [...D.markets.stocks.slice(0, 2), ...D.markets.crypto.slice(0, 2)];
+  const current = names.filter(n => S.current[n]);
+  if (!current.length) { root.innerHTML = '<p class="empty">The first review runs with tonight\'s trades. Until then the accounts run their original rules.</p>'; return; }
+  let html = '<div class="scroll"><table><thead><tr><th>Account</th><th>Setting now</th><th>Since</th></tr></thead><tbody>' +
+    current.map(n => { const c = S.current[n]; return '<tr><td>' + esc(D.labels[n]) + (n.endsWith('crypto') ? ' · crypto' : ' · stocks') + '</td><td class="reason">' + esc(c.description) + '</td><td>' + esc(c.since) + '</td></tr>'; }).join('') + '</tbody></table></div>';
+  if (S.changes.length) html += '<h3>Changes</h3><div class="scroll"><table><thead><tr><th>Date</th><th>Account</th><th>New setting</th><th>Why</th></tr></thead><tbody>' +
+    S.changes.map(c => '<tr><td>' + esc(c.date) + '</td><td>' + esc(D.labels[c.account]) + (c.account.endsWith('crypto') ? ' · crypto' : ' · stocks') + '</td><td class="reason">' + esc(c.description) + '</td><td class="reason">' + esc(c.reason) + '</td></tr>').join('') + '</tbody></table></div>';
+  root.innerHTML = html;
+})();
+// The backtest's controls: the original rules, the self-tuned result, and the bars it should be held to.
+(function controls() {
+  const C = D.controls || {}, rows = [];
+  for (const market of ['stocks', 'crypto']) {
+    const c = C[market] || {};
+    for (const n of D.markets[market].slice(0, 2)) {
+      const a = bt.accounts[n], f = bt.accounts[n + '_fixed'], b = bt.accounts[D.markets[market][2]];
+      if (!a) continue;
+      const ctl = n.startsWith('ml') && c.shuffled_ml_selftuned ? money(Math.min(...c.shuffled_ml_selftuned)) + ' to ' + money(Math.max(...c.shuffled_ml_selftuned)) : '–';
+      rows.push('<tr><td>' + esc(D.labels[n]) + ' · ' + market + '</td><td>' + money(f ? f.final_equity : null) + '</td><td>' + money(a.final_equity) + '</td><td>' + money(b ? b.final_equity : null) + '</td><td>' + money(c.equal_weight_hold) + '</td><td>' + ctl + '</td></tr>');
+    }
+  }
+  document.querySelector('#controls tbody').innerHTML = rows.join('') || '<tr><td colspan="6" class="empty">No controls yet.</td></tr>';
+  document.getElementById('controls-note').textContent = 'From $400, Jan 2018 to Sep 2026, after costs. "Universe held equally" buys every name in the account\'s universe on day one and never trades. The no-skill control shuffles the model\'s odds across names each day and runs the same menu and the same self-tuning layer, five times; the range is shown. Where the self-tuned result sits inside that range, the method has not shown skill.';
+})();
 if (live.skips && live.skips.length) {
   const s = live.skips[live.skips.length - 1];
   document.getElementById('live').insertAdjacentHTML('beforeend', '<p class="meta">Last skipped run: ' + esc(s.run) + ', ' + esc(s.market) + ' (' + esc(s.reason) + ').</p>');

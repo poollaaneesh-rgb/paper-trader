@@ -56,6 +56,7 @@ def build(results: Path, site: Path):
     site.mkdir(parents=True, exist_ok=True)
     summary = json.loads((results / "summary.json").read_text())
     live_trades = _trades(results / "live" / "trades.csv", 30, "live paper")
+    controls_path = results / "backtest" / "controls.json"
     payload = {
         "summary": summary,
         "updated": _when(summary["generated_at"]),
@@ -64,6 +65,7 @@ def build(results: Path, site: Path):
         "backtest_curves": _curves(results / "backtest" / "equity.csv", weekly=True),
         "live_curves": _curves(results / "live" / "equity.csv", weekly=False),
         "trades": live_trades or _trades(results / "backtest" / "trades.csv", 30, "backtest"),
+        "controls": json.loads(controls_path.read_text()) if controls_path.exists() else {},
     }
     html = TEMPLATE.replace("__DATA__", json.dumps(payload, default=str).replace("</", "<\\/"))
     (site / "index.html").write_text(html)
@@ -81,5 +83,6 @@ def build(results: Path, site: Path):
         },
         "latest_trades": live_trades[:5],
         "skips": summary["live"].get("skips", [])[-3:],
+        "settings": summary["live"].get("settings", {}),
     }
     (site / "summary.json").write_text(json.dumps(feed, indent=1, default=str))
