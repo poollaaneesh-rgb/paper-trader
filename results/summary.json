@@ -1,73 +1,73 @@
 {
-  "generated_at": "2026-10-06T11:19+00:00",
+  "generated_at": "2026-10-07T11:06+00:00",
   "live": {
     "phase": "live paper",
     "start": "2026-10-01",
     "start_cash": 400.0,
     "accounts": {
       "tournament_stocks": {
-        "final_equity": 403.37,
-        "total_return": 0.008424999999999905,
+        "final_equity": 404.28,
+        "total_return": 0.010699999999999932,
         "max_drawdown": 0.0,
-        "sharpe": 24.01811669209348,
-        "win_rate": 0.8,
-        "n_trades": 33,
-        "days": 3,
+        "sharpe": 27.35182309728234,
+        "win_rate": 0.7368421052631579,
+        "n_trades": 57,
+        "days": 4,
         "market": "stocks",
         "engine": "tournament"
       },
       "tournament_crypto": {
-        "final_equity": 406.89,
-        "total_return": 0.017225000000000046,
-        "max_drawdown": -0.0038504813101636337,
-        "sharpe": 10.341155973136974,
-        "win_rate": 1.0,
-        "n_trades": 14,
-        "days": 6,
+        "final_equity": 404.89,
+        "total_return": 0.01222499999999993,
+        "max_drawdown": -0.00491533338248662,
+        "sharpe": 6.252080411215738,
+        "win_rate": 0.5,
+        "n_trades": 18,
+        "days": 7,
         "market": "crypto",
         "engine": "tournament"
       },
       "ml_stocks": {
-        "final_equity": 399.58,
-        "total_return": -0.0010499999999999954,
+        "final_equity": 401.45,
+        "total_return": 0.0036249999999999893,
         "max_drawdown": -0.0035411471321695753,
-        "sharpe": -260.43671175753957,
-        "win_rate": 0.5,
-        "n_trades": 13,
-        "days": 3,
+        "sharpe": 1.612827765713696,
+        "win_rate": 0.4,
+        "n_trades": 15,
+        "days": 4,
         "market": "stocks",
         "engine": "ml"
       },
       "ml_crypto": {
-        "final_equity": 399.25,
-        "total_return": -0.00187499999999996,
-        "max_drawdown": -0.004463395172551454,
-        "sharpe": -18.581520999513014,
+        "final_equity": 395.56,
+        "total_return": -0.011099999999999999,
+        "max_drawdown": -0.013664472371833325,
+        "sharpe": -12.453447871463762,
         "win_rate": 0.5,
-        "n_trades": 4,
-        "days": 6,
+        "n_trades": 7,
+        "days": 7,
         "market": "crypto",
         "engine": "ml"
       },
       "bench_spy": {
-        "final_equity": 405.28,
-        "total_return": 0.013199999999999878,
+        "final_equity": 407.5,
+        "total_return": 0.018750000000000044,
         "max_drawdown": 0.0,
-        "sharpe": 253.75598729876376,
+        "sharpe": 106.9275661158576,
         "win_rate": null,
         "n_trades": 1,
-        "days": 3,
+        "days": 4,
         "market": "stocks",
         "engine": "bench"
       },
       "bench_btc": {
-        "final_equity": 408.11,
-        "total_return": 0.020275000000000043,
-        "max_drawdown": -0.008021195401181291,
-        "sharpe": 8.340046297395242,
+        "final_equity": 407.02,
+        "total_return": 0.017549999999999955,
+        "max_drawdown": -0.010670620548844378,
+        "sharpe": 6.701383904010659,
         "win_rate": null,
         "n_trades": 1,
-        "days": 6,
+        "days": 7,
         "market": "crypto",
         "engine": "bench"
       }
@@ -81,9 +81,9 @@
           "since": "2026-10-05"
         },
         "ml_stocks": {
-          "variant": "ml:in55-out55-hold10",
-          "description": "enter above 55% odds, exit below 55%, hold at least 10 days",
-          "since": "2026-10-05"
+          "variant": "ml:in52-out52-hold10",
+          "description": "enter above 52% odds, exit below 52%, hold at least 10 days",
+          "since": "2026-10-06"
         },
         "tournament_crypto": {
           "variant": "tour:default-21-D-net",
@@ -97,6 +97,13 @@
         }
       },
       "changes": [
+        {
+          "date": "2026-10-06",
+          "account": "ml_stocks",
+          "variant": "ml:in52-out52-hold10",
+          "description": "enter above 52% odds, exit below 52%, hold at least 10 days",
+          "reason": "ahead of the previous setting by 1.8% over 126 trading days, after costs"
+        },
         {
           "date": "2026-10-05",
           "account": "ml_crypto",
