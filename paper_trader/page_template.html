@@ -114,7 +114,7 @@ function chart(el, curves, names) {
       const k = kindOf(n);
       return {label: D.labels[n], short: k === 'bench' ? 'Hold' : k === 'ml' ? 'ML' : 'Tournament',
         data: labels.map(d => map[d] ?? null), borderColor: COLORS[k], borderWidth: 2, pointRadius: 0,
-        pointHoverRadius: 4, borderDash: k === 'bench' ? [4, 3] : [], spanGaps: true, tension: 0};
+        pointHoverRadius: 4, borderDash: n.startsWith('bench_eq') ? [1, 3] : k === 'bench' ? [4, 3] : [], spanGaps: true, tension: 0};
     })},
     options: {responsive: true, maintainAspectRatio: false, animation: false,
       layout: {padding: {right: 72}},

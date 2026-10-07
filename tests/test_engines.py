@@ -36,3 +36,20 @@ def test_tuned_ml_reports_its_choice_and_explains_trades():
     text = explain(d, "AAA", "buy")
     assert "odds" in text and variants.describe(chosen.loc[d]) in text
     assert "fixed_weights" in diag and diag["fixed_weights"].shape[1] == 4
+
+
+def test_equal_weight_benchmark_holds_every_ticker_from_the_decide_date():
+    from paper_trader import engines
+    from paper_trader.config import Market
+    from tests.conftest import make_panel
+
+    p = make_panel(n_days=400, freq="D")
+    mkt = Market("crypto", tuple(p.tickers), p.tickers[0], 0.003, 2)
+    start = p.dates[-10]
+    w, explain, diag = engines.targets("bench_eq", mkt, p, start)
+    decide = p.dates[p.dates < start][-1]
+    row = w.loc[decide]
+    assert abs(row.sum() - 1.0) < 1e-9 and all(abs(x - 1 / len(p.tickers)) < 1e-9 for x in row)
+    assert w.loc[p.dates[-1]].isna().all()  # never rebalanced: no later target row
+    assert explain(decide, p.tickers[0], "buy") == "held at equal weight from the first live day, never rebalanced"
+    assert diag == {}

@@ -16,10 +16,12 @@ LABELS = {
     "tournament_crypto": "Tournament",
     "ml_crypto": "ML model",
     "bench_btc": "Bitcoin buy-and-hold",
+    "bench_eq_stocks": "All 30 at equal weight",
+    "bench_eq_crypto": "All 6 coins at equal weight",
 }
 MARKET_ACCOUNTS = {
-    "stocks": ["tournament_stocks", "ml_stocks", "bench_spy"],
-    "crypto": ["tournament_crypto", "ml_crypto", "bench_btc"],
+    "stocks": ["tournament_stocks", "ml_stocks", "bench_spy", "bench_eq_stocks"],
+    "crypto": ["tournament_crypto", "ml_crypto", "bench_btc", "bench_eq_crypto"],
 }
 
 

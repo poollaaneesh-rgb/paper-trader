@@ -65,7 +65,7 @@ CRYPTO = Market(
     name="crypto",
     tickers=("BTC-USD", "ETH-USD", "SOL-USD", "BNB-USD", "XRP-USD", "ADA-USD"),
     benchmark="BTC-USD",
-    cost_rate=0.005 + SLIPPAGE,
+    cost_rate=0.0025 + SLIPPAGE,  # Alpaca's tier-one crypto taker fee, from 2026-10-07 (0.5% before)
     max_positions=3,
 )
 

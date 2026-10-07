@@ -13,11 +13,12 @@ Fake money only. Not connected to any brokerage, holds no keys, and is not inves
 | `tournament_stocks`, `tournament_crypto` | 30 US stocks/ETFs, 6 coins | Momentum, mean reversion and trend; capital shifts toward the winners; the self-tuning layer picks the strategy speeds, lookback and cadence |
 | `ml_stocks`, `ml_crypto` | same | Gradient-boosted trees on nine price features, retrained weekly; the self-tuning layer picks how the odds become positions (entry line, exit line, minimum hold, or cash) |
 | `bench_spy`, `bench_btc` | SPY, BTC | Buy and hold, never trades |
+| `bench_eq_stocks`, `bench_eq_crypto` | 30 US stocks/ETFs, 6 coins | Every name at equal weight from the first live day, never rebalanced |
 
 ## Method
 
 - **No look-ahead:** decisions use data to the close and fill at the next open. Tests truncate the data and check that no earlier decision changes.
-- **Costs:** 0.05% slippage on stocks; 0.5% fee plus 0.05% slippage on crypto.
+- **Costs:** 0.05% slippage on stocks; on crypto, a 0.25% fee (Alpaca's tier-one taker fee) plus 0.05% slippage from 2026-10-07, and a 0.5% fee before that.
 - **Backtest:** walk-forward 2018-01-01 to 2026-09-30 on prices frozen in `results/backtest/` (Yahoo's adjusted prices shift by about 1e-6 between downloads, which was enough to move the stock ML result between $484 and $965).
 - **Live paper:** from 2026-10-01, one day at a time, by GitHub Actions every evening. Only this record is real evidence, and the live record is never recomputed. One known deviation: the crypto accounts were set up before Sep 30 had closed, so their first fill landed on Sep 30, a day early. Fixed on 2026-10-04; the recorded days stay as they happened.
 
@@ -35,6 +36,7 @@ The layer is a function of price history alone, so the truncation tests cover it
 - The tournament nearly matched the S&P 500 on stocks ($1,255 vs $1,300) with a smaller worst drop (-25% vs -34%) and a higher Sharpe ratio (0.91 vs 0.81). None of that is evidence of skill: the daily return difference from SPY has a t-statistic of -0.27, each Sharpe ratio carries a standard error of about 0.40 over this sample, and the smaller drop mostly reflects a beta of 0.69 to the market. It is one sample period, and the strategy thresholds were never tested out of sample.
 - The ML model's daily up/down calls on stocks are right 53.2% of the time, slightly worse than always guessing "up" (stocks rose on 53.5% of the scored days). It turns over 57% of the stock account a day. Fees decide its result: $2,083 with no fees, $597 at 0.05%, $171 at 0.1%. In crypto, 0.55% per trade took it from $3,620 (no fees) to $2.75.
 - Survivorship bias: the universe is today's large names, which flatters every backtest here.
+- 2026-10-07: two live equal-weight benchmarks joined the record (filled from the first live day, Oct 1, at their first run), and the crypto ledger fee now matches Alpaca's tier-one taker fee. The recorded days before the change stay as they happened; the backtest figures above were run at the old 0.5% fee.
 
 ## Code map
 
