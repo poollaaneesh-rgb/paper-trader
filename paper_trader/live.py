@@ -5,10 +5,14 @@ from __future__ import annotations
 import pandas as pd
 
 from paper_trader import engines, selftune, simulate, variants
-from paper_trader.config import FEE_CHANGE_NOTE, LIVE_START, MARKETS, START_CASH
+from paper_trader.config import BANKRUPT_AT, FEE_CHANGE_NOTE, LIVE_START, MARKETS, START_CASH
 from paper_trader.portfolio import Account
 
 STALE_DAYS = {"stocks": 5, "crypto": 1}  # max calendar days between the last candle and yesterday
+BENCH_KINDS = {"bench", "bench_eq"}  # benchmarks buy once and hold; they never go bankrupt by trading
+BANKRUPT_REASON = (
+    f"bankrupt: the account fell under ${BANKRUPT_AT:.2f}, the smallest order; it sells what is left and stops for good"
+)
 
 
 def init_state(accounts=None) -> dict:
@@ -24,6 +28,7 @@ def init_state(accounts=None) -> dict:
                 "last_date": decide,
                 "initialised": False,
                 "variant": None,  # the self-tuning layer's current setting, once it has run
+                "bankrupt": None,  # the date the account went bankrupt, if it has
             }
             for name in accounts
         },
@@ -115,11 +120,20 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None):
                 rows = simulate.step(acct, d, panel, _series(a["pending"]), market.cost_rate, avg_cost)
                 if rows:
                     tr = engines.attach_reasons(pd.DataFrame(rows), panel, explain)
+                    if a.get("bankrupt"):
+                        tr["reason"] = BANKRUPT_REASON
                     trade_rows += tr.assign(account=name).to_dict("records")
-                eq_rows.append({"date": d, "account": name, "equity": round(simulate.mark(acct, d, panel), 2)})
+                equity = round(simulate.mark(acct, d, panel), 2)
+                eq_rows.append({"date": d, "account": name, "equity": equity})
+                a["last_date"] = d.date().isoformat()
+                if not a.get("bankrupt") and kind not in BENCH_KINDS and equity < BANKRUPT_AT:
+                    a["bankrupt"] = d.date().isoformat()
+                if a.get("bankrupt"):
+                    # Sell anything still held at the next open, then hold cash for good; the equity rows continue.
+                    a["pending"] = {t: 0.0 for t in acct.positions} or None
+                    continue
                 row = w.loc[d] if d in w.index else None
                 a["pending"] = None if row is None or row.isna().all() else row.fillna(0.0).to_dict()
-                a["last_date"] = d.date().isoformat()
                 change = _setting_change(a, name, mkey, d, diag)
                 if change:
                     setting_rows.append(change)

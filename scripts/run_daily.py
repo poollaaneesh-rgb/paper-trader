@@ -37,7 +37,7 @@ def settings_summary() -> dict:
     return {"current": current, "changes": rows.iloc[::-1].head(20).to_dict("records")}
 
 
-def live_summary(skips) -> dict:
+def live_summary(skips, states: dict | None = None) -> dict:
     eq = pd.read_csv(LIVE / "equity.csv", parse_dates=["date"]) if (LIVE / "equity.csv").exists() else None
     tr = pd.read_csv(LIVE / "trades.csv") if (LIVE / "trades.csv").exists() else pd.DataFrame()
     out = {"phase": "live paper", "start": LIVE_START, "start_cash": START_CASH, "accounts": {}, "skips": skips}
@@ -46,7 +46,8 @@ def live_summary(skips) -> dict:
         series = eq[eq.account == name].set_index("date")["equity"] if eq is not None else pd.Series(dtype=float)
         trades = tr[tr.account == name] if len(tr) else pd.DataFrame(columns=["realized_pnl"])
         s = metrics.summary(series, trades, 252 if mkey == "stocks" else 365, START_CASH)
-        s.update({"market": mkey, "engine": kind})
+        s.update({"market": mkey, "engine": kind, "bankrupt": (states or {}).get(name, {}).get("bankrupt")})
+        s["return_30d"] = metrics.trailing_return(series)
         out["accounts"][name] = s
     return out
 
@@ -71,7 +72,7 @@ def main():
     backtest = json.loads((RES / "backtest" / "summary.json").read_text())
     summary = {
         "generated_at": pd.Timestamp.now(tz="UTC").isoformat(timespec="minutes"),
-        "live": live_summary(state["skips"]),
+        "live": live_summary(state["skips"], state["accounts"]),
         "backtest": backtest,
     }
     (RES / "summary.json").write_text(json.dumps(summary, indent=2, default=str))
