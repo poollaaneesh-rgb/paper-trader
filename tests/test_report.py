@@ -13,3 +13,10 @@ def test_the_page_reads_each_market_as_tournament_then_ml_then_the_benchmarks():
     for market, names in report.MARKET_ACCOUNTS.items():
         assert [engines.ACCOUNTS[n][1] for n in names] == ["tournament", "ml", "bench", "bench_eq"]
         assert {engines.ACCOUNTS[n][0] for n in names} == {market}
+
+
+def test_the_chart_draws_every_date_of_every_series():
+    # The x axis used to be the last series' dates. Once a benchmark started a day after the bots (the crypto
+    # bots have a Sep 30 point), that day fell off the chart, so the axis must be the sorted union of all series.
+    assert "[...new Set(series.flatMap(n => curves[n].dates))].sort()" in report.TEMPLATE
+    assert "curves[series[series.length - 1]].dates" not in report.TEMPLATE

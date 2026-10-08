@@ -106,7 +106,7 @@ function verdict(accts, market) {
 function chart(el, curves, names) {
   const series = names.filter(n => curves[n]);
   if (!series.length) return;
-  const labels = curves[series[series.length - 1]].dates;
+  const labels = [...new Set(series.flatMap(n => curves[n].dates))].sort(); // every day any series has, so none is cut off
   const endLabels = {id: 'endLabels', afterDatasetsDraw(c) {
     const ctx = c.ctx; ctx.save(); ctx.font = '12px -apple-system, Segoe UI, sans-serif'; ctx.fillStyle = css('--ink2');
     c.data.datasets.forEach((ds, i) => { const meta = c.getDatasetMeta(i); const p = meta.data[meta.data.length - 1];

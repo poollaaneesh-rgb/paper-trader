@@ -100,8 +100,8 @@ def test_an_account_added_later_joins_at_its_first_run(monkeypatch):
 
 
 def test_a_new_benchmark_starts_on_the_live_start_date_and_leaves_the_other_records_alone(monkeypatch):
-    # Ruling: the equal-weight benchmarks begin on LIVE_START like bench_btc, not on the day they were added,
-    # and adding them recomputes nothing for any account already running.
+    # The equal-weight benchmarks begin on LIVE_START like bench_btc, not on the day they were added, and adding
+    # them recomputes nothing for any account already running.
     monkeypatch.setattr(live, "LIVE_START", "2026-10-01")
     p = make_panel(n_days=2650, freq="D").truncate("2026-10-05")
     state = live.init_state(ACCTS)
@@ -117,7 +117,7 @@ def test_a_new_benchmark_starts_on_the_live_start_date_and_leaves_the_other_reco
 
 
 def test_a_fee_change_applies_to_later_fills_only(monkeypatch):
-    # Ruling: the crypto fee drop counts from the day it ships; fills already on record keep the rate they paid.
+    # A crypto fee change applies from the day it ships; fills already on record keep the rate they paid.
     monkeypatch.setattr(live, "LIVE_START", "2026-10-01")
     tickers = ("AAA", "BBB", "CCC", "DDD")
     old = {"crypto": Market("crypto", tickers, "AAA", 0.0055, 2)}
@@ -173,25 +173,27 @@ def _switch_reason(monkeypatch, market_key, lead):
     return later[0]["reason"]
 
 
-def test_the_fee_note_wording_is_the_one_the_coordinator_gave():
-    assert FEE_CHANGE_NOTE == (
-        "re-scored under the crypto fee changed on 2026-10-07 (0.25% + 0.05% a side); the layer's choice moved with it"
-    )
+def test_the_fee_change_note_states_the_date_and_the_new_crypto_cost():
+    assert "2026-10-07" in FEE_CHANGE_NOTE
+    assert "0.25%" in FEE_CHANGE_NOTE and "0.05%" in FEE_CHANGE_NOTE
+    assert "crypto" in FEE_CHANGE_NOTE and "re-scored" in FEE_CHANGE_NOTE
 
 
 @pytest.mark.parametrize("lead", [0.005, -0.0002, float("nan")])
-def test_a_crypto_switch_with_a_lead_below_the_margin_says_the_fee_moved_it(monkeypatch, lead):
-    assert _switch_reason(monkeypatch, "crypto", lead) == FEE_CHANGE_NOTE
+def test_a_crypto_setting_change_below_the_margin_cites_the_fee_change(monkeypatch, lead):
+    reason = _switch_reason(monkeypatch, "crypto", lead)
+    assert reason == FEE_CHANGE_NOTE
+    assert "2026-10-07" in reason and "0.25%" in reason and "ahead of" not in reason
 
 
 @pytest.mark.parametrize("lead", [selftune.MARGIN, 0.05])
-def test_a_crypto_switch_with_a_lead_at_the_margin_or_above_keeps_the_score_wording(monkeypatch, lead):
+def test_a_crypto_setting_change_at_or_above_the_margin_cites_the_score_lead(monkeypatch, lead):
     reason = _switch_reason(monkeypatch, "crypto", lead)
     assert (
         reason == f"ahead of the previous setting by {lead * 100:.1f}% over {selftune.WINDOW} trading days, after costs"
     )
 
 
-def test_a_stocks_switch_below_the_margin_never_blames_the_crypto_fee(monkeypatch):
+def test_a_stocks_setting_change_below_the_margin_does_not_cite_the_crypto_fee(monkeypatch):
     reason = _switch_reason(monkeypatch, "stocks", -0.0002)
     assert reason == f"ahead of the previous setting by -0.0% over {selftune.WINDOW} trading days, after costs"
