@@ -7,6 +7,9 @@ DATA_START = "2015-01-01"  # warm-up history for 200-day averages and the first 
 BACKTEST_START = "2018-01-01"
 BACKTEST_END = "2026-09-30"
 LIVE_START = "2026-10-01"
+# Every trading account runs on its own until it is bankrupt (the user's decision, 2026-10-08): once its equity is
+# under the broker's smallest order it sells what is left and never trades again. Its record stays on the site.
+BANKRUPT_AT = 1.0
 RETRAIN_EVERY = "W"  # ML retrains on the first trading day of each week
 ML_THRESHOLD = 0.55
 TOURNAMENT_FLOOR = 0.10

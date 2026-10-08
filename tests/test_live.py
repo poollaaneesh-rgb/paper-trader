@@ -197,3 +197,34 @@ def test_a_crypto_setting_change_at_or_above_the_margin_cites_the_score_lead(mon
 def test_a_stocks_setting_change_below_the_margin_does_not_cite_the_crypto_fee(monkeypatch):
     reason = _switch_reason(monkeypatch, "stocks", -0.0002)
     assert reason == f"ahead of the previous setting by -0.0% over {selftune.WINDOW} trading days, after costs"
+
+
+def test_an_account_trades_until_bankrupt_then_sells_out_and_keeps_its_record(monkeypatch):
+    monkeypatch.setattr(live, "LIVE_START", "2026-10-01")
+    full = make_panel(n_days=2650, freq="D").truncate("2026-10-08")
+    crash = pd.Timestamp("2026-10-04")
+    for frame in (full.open, full.close):
+        frame.loc[crash:] *= 0.0001  # every coin loses 99.99% from the 4th
+    real_targets = engines.targets
+
+    def all_in(kind, market, panel, start):
+        if kind == "bench":
+            return real_targets(kind, market, panel, start)
+        w = pd.DataFrame(0.0, index=panel.dates, columns=panel.tickers)
+        w["AAA"] = 1.0
+        return w, (lambda d, t, side: "all in on AAA"), {}
+
+    monkeypatch.setattr(live.engines, "targets", all_in)
+    state = live.init_state(ACCTS)
+    state, eq, trades, _ = live.run(state, {"crypto": full}, pd.Timestamp("2026-10-09"), MKT, ACCTS)
+    a = state["accounts"]["tournament_crypto"]
+    assert a["bankrupt"] == "2026-10-04"
+    assert a["positions"] == {} and a["pending"] is None
+    sells = [t for t in trades if t["account"] == "tournament_crypto" and t["side"] == "sell"]
+    assert [str(t["date"].date()) for t in sells] == ["2026-10-05"]
+    assert sells[0]["reason"] == live.BANKRUPT_REASON
+    after = [t for t in trades if t["account"] == "tournament_crypto" and t["date"] > pd.Timestamp("2026-10-05")]
+    assert after == []
+    days = [str(r["date"].date()) for r in eq if r["account"] == "tournament_crypto"]
+    assert days[-1] == "2026-10-08"  # the equity record continues after the bankruptcy
+    assert state["accounts"]["bench_btc"]["bankrupt"] is None  # a benchmark holds; it never goes bankrupt by trading
