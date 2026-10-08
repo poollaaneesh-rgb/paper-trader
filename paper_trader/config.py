@@ -61,12 +61,17 @@ STOCKS = Market(
     max_positions=5,
 )
 
+# Crypto cost a side: Alpaca's tier-one taker fee plus slippage, from 2026-10-07 (0.005 + SLIPPAGE before). The
+# self-tuning layer re-scores every setting at the current cost, so a switch it makes because of the change says so.
+FEE_CHANGE_NOTE = (
+    "re-scored under the crypto fee changed on 2026-10-07 (0.25% + 0.05% a side); the layer's choice moved with it"
+)
+
 CRYPTO = Market(
     name="crypto",
     tickers=("BTC-USD", "ETH-USD", "SOL-USD", "BNB-USD", "XRP-USD", "ADA-USD"),
     benchmark="BTC-USD",
-    cost_rate=0.0025
-    + SLIPPAGE,  # Alpaca's tier-one taker fee plus slippage, a side; 0.005 + SLIPPAGE before 2026-10-07
+    cost_rate=0.0025 + SLIPPAGE,
     max_positions=3,
 )
 

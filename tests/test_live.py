@@ -1,9 +1,10 @@
 import copy
 
 import pandas as pd
+import pytest
 
-from paper_trader import engines, live
-from paper_trader.config import CRYPTO, SLIPPAGE, Market
+from paper_trader import engines, live, selftune
+from paper_trader.config import CRYPTO, FEE_CHANGE_NOTE, SLIPPAGE, Market
 from tests.conftest import make_panel
 
 MKT = {"crypto": Market("crypto", ("AAA", "BBB", "CCC", "DDD"), "AAA", 0.005, 2)}
@@ -142,3 +143,55 @@ def test_a_fee_change_applies_to_later_fills_only(monkeypatch):
 
 def test_crypto_fee_matches_alpaca_tier_one():
     assert abs(CRYPTO.cost_rate - (0.0025 + SLIPPAGE)) < 1e-12
+
+
+def _switch_reason(monkeypatch, market_key, lead):
+    """Record variant `tour:a`, then let the layer move to `tour:b` with the given score lead; return that row."""
+    monkeypatch.setattr(live, "LIVE_START", "2026-10-01")
+    cost = 0.0055 if market_key == "crypto" else 0.0005
+    markets = {market_key: Market(market_key, ("AAA", "BBB", "CCC", "DDD"), "AAA", cost, 2)}
+    accts = {f"tournament_{market_key}": (market_key, "tournament")}
+    switch = pd.Timestamp("2026-10-03")
+
+    def fake_targets(kind, market, panel, start):
+        w = pd.DataFrame(0.0, index=panel.dates, columns=panel.tickers)
+        chosen = pd.Series(["tour:a" if d < switch else "tour:b" for d in panel.dates], index=panel.dates)
+        scores = pd.DataFrame({"tour:a": 0.0, "tour:b": lead}, index=panel.dates)
+        return w, (lambda d, t, side: "hold cash"), {"chosen": chosen, "scores": scores}
+
+    monkeypatch.setattr(live.engines, "targets", fake_targets)
+    full = make_panel(n_days=2650, freq="D")
+    state = live.init_state(accts)
+    state, _, _, first = live.run(
+        state, {market_key: full.truncate("2026-10-02")}, pd.Timestamp("2026-10-03"), markets, accts
+    )
+    assert [r["variant"] for r in first] == ["tour:a"]
+    state, _, _, later = live.run(
+        state, {market_key: full.truncate("2026-10-06")}, pd.Timestamp("2026-10-07"), markets, accts
+    )
+    assert len(later) == 1 and later[0]["variant"] == "tour:b"
+    return later[0]["reason"]
+
+
+def test_the_fee_note_wording_is_the_one_the_coordinator_gave():
+    assert FEE_CHANGE_NOTE == (
+        "re-scored under the crypto fee changed on 2026-10-07 (0.25% + 0.05% a side); the layer's choice moved with it"
+    )
+
+
+@pytest.mark.parametrize("lead", [0.005, -0.0002, float("nan")])
+def test_a_crypto_switch_with_a_lead_below_the_margin_says_the_fee_moved_it(monkeypatch, lead):
+    assert _switch_reason(monkeypatch, "crypto", lead) == FEE_CHANGE_NOTE
+
+
+@pytest.mark.parametrize("lead", [selftune.MARGIN, 0.05])
+def test_a_crypto_switch_with_a_lead_at_the_margin_or_above_keeps_the_score_wording(monkeypatch, lead):
+    reason = _switch_reason(monkeypatch, "crypto", lead)
+    assert (
+        reason == f"ahead of the previous setting by {lead * 100:.1f}% over {selftune.WINDOW} trading days, after costs"
+    )
+
+
+def test_a_stocks_switch_below_the_margin_never_blames_the_crypto_fee(monkeypatch):
+    reason = _switch_reason(monkeypatch, "stocks", -0.0002)
+    assert reason == f"ahead of the previous setting by -0.0% over {selftune.WINDOW} trading days, after costs"

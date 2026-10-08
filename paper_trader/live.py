@@ -5,7 +5,7 @@ from __future__ import annotations
 import pandas as pd
 
 from paper_trader import engines, selftune, simulate, variants
-from paper_trader.config import LIVE_START, MARKETS, START_CASH
+from paper_trader.config import FEE_CHANGE_NOTE, LIVE_START, MARKETS, START_CASH
 from paper_trader.portfolio import Account
 
 STALE_DAYS = {"stocks": 5, "crypto": 1}  # max calendar days between the last candle and yesterday
@@ -45,8 +45,13 @@ def _series(d: dict | None):
     return None if d is None else pd.Series(d, dtype=float)
 
 
-def _setting_change(a: dict, name: str, d, diag: dict) -> dict | None:
-    """A settings row when the variant chosen at close `d` differs from the one on record, else None."""
+def _setting_change(a: dict, name: str, mkey: str, d, diag: dict) -> dict | None:
+    """A settings row when the variant chosen at close `d` differs from the one on record, else None.
+
+    The layer re-scores every setting from the whole price history each night, at the market's current cost. On
+    crypto, a switch whose lead over the recorded setting is under the layer's MARGIN was therefore moved by the
+    fee change, not by a gap in the scores, and the row says so instead of printing a negative or empty lead.
+    """
     chosen = diag.get("chosen")
     if chosen is None or d not in chosen.index:
         return None
@@ -59,7 +64,10 @@ def _setting_change(a: dict, name: str, d, diag: dict) -> dict | None:
         s = diag["scores"]
         lead = float(s.at[d, vid] - s.at[d, prev]) if prev in s.columns else float("nan")
         window = selftune.WINDOW
-        reason = f"ahead of the previous setting by {lead * 100:.1f}% over {window} trading days, after costs"
+        if mkey == "crypto" and not (lead >= selftune.MARGIN):  # also true when the lead is NaN
+            reason = FEE_CHANGE_NOTE
+        else:
+            reason = f"ahead of the previous setting by {lead * 100:.1f}% over {window} trading days, after costs"
     a["variant"] = vid
     return {"date": d, "account": name, "variant": vid, "description": variants.describe(vid), "reason": reason}
 
@@ -98,7 +106,7 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None):
                 a["pending"] = None if row.isna().all() else row.fillna(0.0).to_dict()
                 a["initialised"] = True
                 a["last_date"] = decide.date().isoformat()
-                change = _setting_change(a, name, decide, diag)
+                change = _setting_change(a, name, mkey, decide, diag)
                 if change:
                     setting_rows.append(change)
             acct = Account(cash=a["cash"], positions=dict(a["positions"]))
@@ -112,7 +120,7 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None):
                 row = w.loc[d] if d in w.index else None
                 a["pending"] = None if row is None or row.isna().all() else row.fillna(0.0).to_dict()
                 a["last_date"] = d.date().isoformat()
-                change = _setting_change(a, name, d, diag)
+                change = _setting_change(a, name, mkey, d, diag)
                 if change:
                     setting_rows.append(change)
             a["cash"], a["positions"], a["avg_cost"] = acct.cash, acct.positions, avg_cost
