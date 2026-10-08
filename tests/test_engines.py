@@ -36,3 +36,23 @@ def test_tuned_ml_reports_its_choice_and_explains_trades():
     text = explain(d, "AAA", "buy")
     assert "odds" in text and variants.describe(chosen.loc[d]) in text
     assert "fixed_weights" in diag and diag["fixed_weights"].shape[1] == 4
+
+
+def test_equal_weight_benchmark_holds_every_ticker_from_the_decide_date():
+    p = make_panel(n_days=400, freq="D")
+    mkt = Market("crypto", tuple(p.tickers), p.tickers[0], 0.003, 2)
+    start = p.dates[-10]
+    w, explain, diag = engines.targets("bench_eq", mkt, p, start)
+    decide = p.dates[p.dates < start][-1]
+    row = w.loc[decide]
+    assert abs(row.sum() - 1.0) < 1e-9 and all(abs(x - 1 / len(p.tickers)) < 1e-9 for x in row)
+    assert w.loc[p.dates[-1]].isna().all()  # never rebalanced: no later target row
+    assert explain(decide, p.tickers[0], "buy") == "held at equal weight from the first live day, never rebalanced"
+    assert diag == {}
+
+
+def test_equal_weight_benchmarks_are_listed_as_accounts_in_their_own_market():
+    assert engines.ACCOUNTS["bench_eq_stocks"] == ("stocks", "bench_eq")
+    assert engines.ACCOUNTS["bench_eq_crypto"] == ("crypto", "bench_eq")
+    assert engines.ACCOUNTS["bench_spy"] == ("stocks", "bench")  # the single-name benchmarks are unchanged
+    assert engines.ACCOUNTS["bench_btc"] == ("crypto", "bench")

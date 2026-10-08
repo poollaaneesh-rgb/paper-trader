@@ -29,10 +29,11 @@ th:first-child,td:first-child{text-align:left}
 td.reason{text-align:left;white-space:normal;color:var(--ink2);min-width:260px}
 .key{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:8px}
 .key.dash{background:repeating-linear-gradient(90deg,var(--ref) 0 4px,transparent 4px 7px)}
+.key.dot{background:repeating-linear-gradient(90deg,var(--ref) 0 2px,transparent 2px 5px)}
 .chart{position:relative;height:320px;margin-top:8px}
 .legend{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--ink2);margin-top:4px}
 .empty{color:var(--muted);font-size:14px;padding:12px 0;border-top:1px solid var(--line)}
-.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
 .tile{border:1px solid var(--line);border-radius:6px;padding:12px 14px 10px;min-width:0}
 .tile .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .tile .rank{font-size:12px;color:var(--muted)}
@@ -44,7 +45,7 @@ td.reason{text-align:left;white-space:normal;color:var(--ink2);min-width:260px}
 .tile .s{font-size:12px;color:var(--muted)}
 ul{padding-left:20px;max-width:760px}li{margin:6px 0}
 footer{margin-top:56px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
-@media (max-width:760px){.tiles{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:900px){.tiles{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:600px){h1{font-size:32px}.tile{padding:10px}.tile .v{font-size:20px}.stat .v{font-size:24px}.chart{height:260px}}
 </style></head><body><main>
 <h1>Paper Trader</h1>
@@ -79,9 +80,10 @@ footer{margin-top:56px;font-size:12px;color:var(--muted);border-top:1px solid va
 <li><b>Tournament.</b> Momentum (top 3-month returns), mean reversion (5-day RSI under 30, sell above 50) and trend (above the 50-day average, 50-day above the 200-day) each run a share of the account. On the first trading day of every month, money shifts toward the strategies with the best risk-adjusted return over the last three months, with a 10% floor each.</li>
 <li><b>ML model.</b> Gradient-boosted trees on nine price features (returns over 1 to 60 days, volatility, RSI, distance from moving averages, volume change) predict whether each asset rises over the next holding day. Retrained every week on data up to two days before, then holds the top picks above 55% odds. A logistic regression runs alongside as a sanity check.</li>
 <li><b>No look-ahead.</b> Decisions use data up to the close; orders fill at the next day's open. Automated tests truncate the data and check that no past decision changes.</li>
-<li><b>Costs.</b> Stocks pay 0.05% slippage per trade; crypto pays 0.5% fees plus slippage.</li>
+<li><b>Costs.</b> Stocks pay 0.05% slippage per trade. Crypto pays a 0.25% fee plus 0.05% slippage per trade, Alpaca's tier-one taker fee, from Oct 7, 2026. The backtest, and the live trades before that date, were charged a 0.5% fee plus slippage.</li>
+<li><b>Equal-weight benchmarks (added Oct 7, 2026).</b> Two more accounts buy every name in a market in equal amounts on the first live day and never trade again, so the bots can be compared with owning the whole universe as well as with the index. They start on Oct 1 like the other accounts; their results from Oct 1 to Oct 7 were computed when they were added.</li>
 <li><b>Self-tuning (since Oct 6, 2026).</b> Each engine keeps a menu of settings: for the ML model, how its odds become positions (an entry line from 52% to 62%, an exit line below it, a minimum hold of 1 to 10 days, or sitting in cash); for the tournament, slower and faster strategy settings, a 21 to 252 day lookback, monthly, weekly or daily re-weighting, scored after costs. Every setting runs as a shadow account on the same prices. Each night the bot scores them on the last 126 trading days after costs and moves to the leader only when it is ahead by 2%. The menu and the three numbers were fixed before any result was seen, and the layer is a function of prices alone, so the no-look-ahead tests cover it. On the 2018 to 2026 prices it switched every 3 to 11 weeks.</li>
-<li><b>Fees decide the ML result.</b> The ML model trades a lot: it turns over about 57% of the stock account and 24% of the crypto account every day. In the backtest the stock model ends at $2,083 with no fees, $597 with the real 0.05% and $171 at 0.1%. The crypto model would have reached $3,620 with no fees and ends at $2.75 after its 0.55% per trade. Its daily up/down calls are right about 52 to 53% of the time, close to how often prices simply rise. Two downloads of the same prices that differed by one part in a million moved the stock result between $484 and $965, so the backtest prices are frozen in the repo to make these numbers reproducible.</li>
+<li><b>Fees decide the ML result.</b> The ML model trades a lot: it turns over about 57% of the stock account and 24% of the crypto account every day. In the backtest the stock model ends at $2,083 with no fees, $597 with the real 0.05% and $171 at 0.1%. The crypto model would have reached $3,620 with no fees and ends at $2.75 after its old 0.55% per trade (0.5% fee plus slippage). Its daily up/down calls are right about 52 to 53% of the time, close to how often prices simply rise. Two downloads of the same prices that differed by one part in a million moved the stock result between $484 and $965, so the backtest prices are frozen in the repo to make these numbers reproducible.</li>
 <li><b>What the self-tuning test does not show.</b> Most of its gain over the original rules is fees saved by trading less. None of the four accounts beat simply holding its own universe at equal weight, and a no-skill control (the model's picks shuffled across names each day, same machinery) reproduces much of the stock result. The outcome also swings widely with the layer's own settings, the mark of a fragile result. The menu was chosen knowing fees were the problem, so this is still a backtest.</li>
 <li><b>Known limits.</b> The universe is today's large companies and coins, which flatters any backtest (survivorship bias). Only the live paper record is real evidence.</li>
 </ul>
@@ -92,11 +94,13 @@ footer{margin-top:56px;font-size:12px;color:var(--muted);border-top:1px solid va
 <script>
 const D = JSON.parse(document.getElementById('data').textContent);
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const COLORS = {tournament: css('--s1'), ml: css('--s2'), bench: css('--ref')};
+const COLORS = {tournament: css('--s1'), ml: css('--s2'), bench: css('--ref'), bench_eq: css('--ref')};
 const money = v => v == null ? '–' : '$' + Number(v).toLocaleString('en-US', {maximumFractionDigits: 0});
 const pct = v => v == null ? '–' : (v >= 0 ? '+' : '−') + Math.abs(v * 100).toFixed(1) + '%';
 const num = (v, d = 2) => v == null ? '–' : Number(v).toFixed(d);
-const kindOf = n => n.startsWith('ml') ? 'ml' : n.startsWith('bench') ? 'bench' : 'tournament';
+const kindOf = n => n.startsWith('ml') ? 'ml' : n.startsWith('bench_eq') ? 'bench_eq' : n.startsWith('bench') ? 'bench' : 'tournament';
+const SHORT = {tournament: 'Tournament', ml: 'ML', bench: 'Hold', bench_eq: 'Equal hold'};
+const DASH = {bench: [4, 3], bench_eq: [1, 3]};
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 document.getElementById('updated').textContent = 'Updated ' + D.updated;
 const MIN_DAYS = 60; // ratios over fewer trading days are noise
@@ -127,9 +131,9 @@ function chart(el, curves, names) {
     data: {labels, datasets: series.map(n => {
       const map = Object.fromEntries(curves[n].dates.map((d, i) => [d, curves[n].equity[i]]));
       const k = kindOf(n);
-      return {label: D.labels[n], short: k === 'bench' ? 'Hold' : k === 'ml' ? 'ML' : 'Tournament',
+      return {label: D.labels[n], short: SHORT[k],
         data: labels.map(d => map[d] ?? null), borderColor: COLORS[k], borderWidth: 2, pointRadius: 0,
-        pointHoverRadius: 4, borderDash: k === 'bench' ? [4, 3] : [], spanGaps: true, tension: 0};
+        pointHoverRadius: 4, borderDash: DASH[k] || [], spanGaps: true, tension: 0};
     })},
     options: {responsive: true, maintainAspectRatio: false, animation: false,
       layout: {padding: {right: 72}},
@@ -143,14 +147,14 @@ function chart(el, curves, names) {
 
 function legend(names) {
   return '<div class="legend">' + names.map(n => { const k = kindOf(n);
-    return '<span><span class="key' + (k === 'bench' ? ' dash' : '') + '" style="' + (k === 'bench' ? '' : 'background:' + COLORS[k]) + '"></span>' + esc(D.labels[n]) + '</span>'; }).join('') + '</div>';
+    return '<span><span class="key' + (k === 'bench' ? ' dash' : k === 'bench_eq' ? ' dot' : '') + '" style="' + (k in DASH ? '' : 'background:' + COLORS[k]) + '"></span>' + esc(D.labels[n]) + '</span>'; }).join('') + '</div>';
 }
 
 function section(rootId, block, curves, phase) {
   const root = document.getElementById(rootId);
   for (const market of ['stocks', 'crypto']) {
-    const names = D.markets[market];
     const accts = block.accounts;
+    const names = D.markets[market].filter(n => accts[n]);
     const title = market === 'stocks' ? 'US stocks and ETFs' : 'Crypto';
     let html = '<h3>' + title + '</h3>';
     const started = names.some(n => accts[n] && accts[n].days > 0);
@@ -200,12 +204,12 @@ function section(rootId, block, curves, phase) {
     const line = p.map(([t, v]) => X(t).toFixed(1) + ',' + Y(v).toFixed(1)).join(' ');
     const vs = k === 'bench' || !b ? 'The index to beat' : (a.total_return >= b.total_return ? 'Ahead of ' : 'Behind ') + 'its index by ' + Math.abs((a.total_return - b.total_return) * 100).toFixed(1) + ' pts';
     const cls = a.total_return > 0 ? 'up' : a.total_return < 0 ? 'down' : '';
-    const title = D.labels[n] + (k === 'bench' ? '' : ' · ' + marketOf(n));
+    const title = k === 'bench' ? D.labels[n] : (k === 'bench_eq' ? 'Equal-weight hold' : D.labels[n]) + ' · ' + marketOf(n);
     return '<div class="tile"><div class="top"><span class="name">' + esc(title) + '</span><span class="rank">#' + (i + 1) + '</span></div>' +
       '<div class="v">' + money(a.final_equity) + '</div><div class="r"><b class="' + cls + '">' + pct(a.total_return) + '</b> from $400</div>' +
       '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="' + esc(title) + ' balance, ' + money(400) + ' to ' + money(a.final_equity) + '">' +
       '<line x1="0" x2="' + W + '" y1="' + Y(400).toFixed(1) + '" y2="' + Y(400).toFixed(1) + '" stroke="' + css('--line') + '" stroke-width="1" vector-effect="non-scaling-stroke"/>' +
-      '<polyline points="' + line + '" fill="none" stroke="' + COLORS[k] + '" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"' + (k === 'bench' ? ' stroke-dasharray="4 3"' : '') + '/>' +
+      '<polyline points="' + line + '" fill="none" stroke="' + COLORS[k] + '" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"' + (DASH[k] ? ' stroke-dasharray="' + DASH[k].join(' ') + '"' : '') + '/>' +
       '<line x1="' + X(last[0]).toFixed(1) + '" x2="' + X(last[0]).toFixed(1) + '" y1="' + Y(last[1]).toFixed(1) + '" y2="' + Y(last[1]).toFixed(1) + '" stroke="' + COLORS[k] + '" stroke-width="6" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>' +
       '<div class="s">' + esc(vs) + ' · ' + a.days + ' trading day' + (a.days === 1 ? '' : 's') + '</div></div>';
   }).join('') + '</div>';

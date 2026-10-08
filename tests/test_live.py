@@ -3,7 +3,7 @@ import copy
 import pandas as pd
 
 from paper_trader import engines, live
-from paper_trader.config import Market
+from paper_trader.config import CRYPTO, SLIPPAGE, Market
 from tests.conftest import make_panel
 
 MKT = {"crypto": Market("crypto", ("AAA", "BBB", "CCC", "DDD"), "AAA", 0.005, 2)}
@@ -84,3 +84,61 @@ def test_records_a_settings_row_only_when_the_choice_changes(monkeypatch):
     assert len(later) == 1 and later[0]["variant"] == "tour:b" and str(later[0]["date"].date()) == "2026-10-03"
     assert "5.0%" in later[0]["reason"]
     assert state["accounts"]["tournament_crypto"]["variant"] == "tour:b"
+
+
+def test_an_account_added_later_joins_at_its_first_run(monkeypatch):
+    monkeypatch.setattr(live, "LIVE_START", "2026-10-01")
+    p = make_panel(n_days=2650, freq="D").truncate("2026-10-05")
+    state = live.init_state(ACCTS)
+    state, *_ = live.run(state, {"crypto": p}, pd.Timestamp("2026-10-06"), MKT, ACCTS)
+    more = {**ACCTS, "bench_eq_crypto": ("crypto", "bench_eq")}
+    state, eq, trades, _ = live.run(state, {"crypto": p}, pd.Timestamp("2026-10-06"), MKT, more)
+    assert "bench_eq_crypto" in state["accounts"]
+    assert [r for r in eq if r["account"] == "bench_eq_crypto"]
+    assert len({t["ticker"] for t in trades if t["account"] == "bench_eq_crypto"}) == len(MKT["crypto"].tickers)
+
+
+def test_a_new_benchmark_starts_on_the_live_start_date_and_leaves_the_other_records_alone(monkeypatch):
+    # Ruling: the equal-weight benchmarks begin on LIVE_START like bench_btc, not on the day they were added,
+    # and adding them recomputes nothing for any account already running.
+    monkeypatch.setattr(live, "LIVE_START", "2026-10-01")
+    p = make_panel(n_days=2650, freq="D").truncate("2026-10-05")
+    state = live.init_state(ACCTS)
+    state, *_ = live.run(state, {"crypto": p}, pd.Timestamp("2026-10-06"), MKT, ACCTS)
+    before = copy.deepcopy(state["accounts"])
+    more = {**ACCTS, "bench_eq_crypto": ("crypto", "bench_eq")}
+    state, eq, trades, _ = live.run(state, {"crypto": p}, pd.Timestamp("2026-10-06"), MKT, more)
+    days = [str(r["date"].date()) for r in eq if r["account"] == "bench_eq_crypto"]
+    assert days == ["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04", "2026-10-05"]
+    assert {str(t["date"].date()) for t in trades if t["account"] == "bench_eq_crypto"} == {"2026-10-01"}
+    assert {r["account"] for r in eq} == {"bench_eq_crypto"} == {t["account"] for t in trades}
+    assert all(state["accounts"][name] == before[name] for name in ACCTS)
+
+
+def test_a_fee_change_applies_to_later_fills_only(monkeypatch):
+    # Ruling: the crypto fee drop counts from the day it ships; fills already on record keep the rate they paid.
+    monkeypatch.setattr(live, "LIVE_START", "2026-10-01")
+    tickers = ("AAA", "BBB", "CCC", "DDD")
+    old = {"crypto": Market("crypto", tickers, "AAA", 0.0055, 2)}
+    new = {"crypto": Market("crypto", tickers, "AAA", 0.0030, 2)}
+    flip = {"flip": ("crypto", "flip")}
+
+    def flip_targets(kind, market, panel, start):  # holds AAA on even days and BBB on odd days: a fill every day
+        w = pd.DataFrame(0.0, index=panel.dates, columns=panel.tickers)
+        w.loc[panel.dates[panel.dates.day % 2 == 0], "AAA"] = 1.0
+        w.loc[panel.dates[panel.dates.day % 2 == 1], "BBB"] = 1.0
+        return w, (lambda d, t, side: "flip"), {}
+
+    monkeypatch.setattr(live.engines, "targets", flip_targets)
+    full = make_panel(n_days=2650, freq="D")
+    state = live.init_state(flip)
+    state, _, first, _ = live.run(state, {"crypto": full.truncate("2026-10-03")}, pd.Timestamp("2026-10-04"), old, flip)
+    state, _, later, _ = live.run(state, {"crypto": full.truncate("2026-10-06")}, pd.Timestamp("2026-10-07"), new, flip)
+    assert {str(t["date"].date()) for t in first} == {"2026-10-01", "2026-10-02", "2026-10-03"}
+    assert {str(t["date"].date()) for t in later} == {"2026-10-04", "2026-10-05", "2026-10-06"}  # nothing re-emitted
+    assert all(abs(t["cost"] / t["value"] - 0.0055) < 1e-9 for t in first)
+    assert all(abs(t["cost"] / t["value"] - 0.0030) < 1e-9 for t in later)
+
+
+def test_crypto_fee_matches_alpaca_tier_one():
+    assert abs(CRYPTO.cost_rate - (0.0025 + SLIPPAGE)) < 1e-12
