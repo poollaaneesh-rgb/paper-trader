@@ -228,3 +228,13 @@ def test_an_account_trades_until_bankrupt_then_sells_out_and_keeps_its_record(mo
     days = [str(r["date"].date()) for r in eq if r["account"] == "tournament_crypto"]
     assert days[-1] == "2026-10-08"  # the equity record continues after the bankruptcy
     assert state["accounts"]["bench_btc"]["bankrupt"] is None  # a benchmark holds; it never goes bankrupt by trading
+
+
+def test_trailing_return_waits_for_thirty_days_and_uses_the_last_mark_on_or_before_the_start():
+    from paper_trader.metrics import trailing_return
+
+    dates = pd.to_datetime(["2026-10-01", "2026-10-02", "2026-10-31", "2026-11-03"])
+    eq = pd.Series([400.0, 410.0, 420.0, 440.0], index=dates)
+    assert trailing_return(eq.iloc[:2]) is None  # two days of history
+    assert trailing_return(eq.iloc[:3]) == pytest.approx(420 / 400 - 1)  # Oct 31 less 30 days is Oct 1: just enough
+    assert trailing_return(eq) == pytest.approx(440 / 410 - 1)  # Nov 3 less 30 days is Oct 4: the Oct 2 mark

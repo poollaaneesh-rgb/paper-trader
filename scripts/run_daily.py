@@ -47,6 +47,7 @@ def live_summary(skips, states: dict | None = None) -> dict:
         trades = tr[tr.account == name] if len(tr) else pd.DataFrame(columns=["realized_pnl"])
         s = metrics.summary(series, trades, 252 if mkey == "stocks" else 365, START_CASH)
         s.update({"market": mkey, "engine": kind, "bankrupt": (states or {}).get(name, {}).get("bankrupt")})
+        s["return_30d"] = metrics.trailing_return(series)
         out["accounts"][name] = s
     return out
 
