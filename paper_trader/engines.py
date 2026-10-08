@@ -1,4 +1,4 @@
-"""The six fake accounts: which market, which engine, and why each trade happened.
+"""The eight fake accounts: which market, which engine, and why each trade happened.
 
 Since 2026-10-05 the tournament and ML engines are self-tuning: each runs a menu of settings as shadow accounts
 (variants.py) and follows the one that leads after costs (selftune.py). The original fixed rules stay in the menu
@@ -21,6 +21,8 @@ ACCOUNTS = {
     "ml_crypto": ("crypto", "ml"),
     "bench_spy": ("stocks", "bench"),
     "bench_btc": ("crypto", "bench"),
+    "bench_eq_stocks": ("stocks", "bench_eq"),
+    "bench_eq_crypto": ("crypto", "bench_eq"),
 }
 
 
@@ -29,15 +31,26 @@ def _switches(chosen: pd.Series, start) -> int:
     return int((live != live.shift(1)).sum() - 1) if len(live) else 0
 
 
+def _hold_once(panel, start, weights: dict[str, float]) -> pd.DataFrame:
+    """One target row, decided at the last close before `start`, and no row after it: buy once and never trade again."""
+    w = pd.DataFrame(np.nan, index=panel.dates, columns=panel.tickers)
+    decide = panel.dates[panel.dates < start][-1]
+    w.loc[decide] = 0.0
+    for ticker, weight in weights.items():
+        w.loc[decide, ticker] = weight
+    return w
+
+
 def targets(kind: str, market, panel, start):
     """Return (weights, explain(decision_date, ticker, side) -> str, diagnostics)."""
     start = pd.Timestamp(start)
     if kind == "bench":
-        w = pd.DataFrame(np.nan, index=panel.dates, columns=panel.tickers)
-        decide = panel.dates[panel.dates < start][-1]
-        w.loc[decide] = 0.0
-        w.loc[decide, market.benchmark] = 1.0
+        w = _hold_once(panel, start, {market.benchmark: 1.0})
         return w, lambda d, t, side: "buy and hold, never trades again", {}
+
+    if kind == "bench_eq":
+        w = _hold_once(panel, start, dict.fromkeys(panel.tickers, 1 / len(panel.tickers)))
+        return w, lambda d, t, side: "held at equal weight from the first live day, never rebalanced", {}
 
     if kind == "tournament":
         menu = variants.tournament_variants(panel, market.max_positions, market.cost_rate)
