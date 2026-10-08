@@ -32,13 +32,28 @@ td.reason{text-align:left;white-space:normal;color:var(--ink2);min-width:260px}
 .chart{position:relative;height:320px;margin-top:8px}
 .legend{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--ink2);margin-top:4px}
 .empty{color:var(--muted);font-size:14px;padding:12px 0;border-top:1px solid var(--line)}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+.tile{border:1px solid var(--line);border-radius:6px;padding:12px 14px 10px;min-width:0}
+.tile .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.tile .rank{font-size:12px;color:var(--muted)}
+.tile .name{font-weight:600;font-size:14px;line-height:1.3}
+.tile .v{font-size:24px;font-weight:600;line-height:1.2;margin-top:2px}
+.tile .r{font-size:13px;color:var(--ink2)}
+.tile .r b{font-weight:600}.tile .up{color:#1a7f37}.tile .down{color:var(--red)}
+.tile svg{display:block;width:100%;height:56px;margin:8px 0 4px}
+.tile .s{font-size:12px;color:var(--muted)}
 ul{padding-left:20px;max-width:760px}li{margin:6px 0}
 footer{margin-top:56px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
-@media (max-width:600px){h1{font-size:32px}.stat .v{font-size:24px}.chart{height:260px}}
+@media (max-width:760px){.tiles{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:600px){h1{font-size:32px}.tile{padding:10px}.tile .v{font-size:20px}.stat .v{font-size:24px}.chart{height:260px}}
 </style></head><body><main>
 <h1>Paper Trader</h1>
 <p class="lede">A strategy tournament and a machine-learning model each trade $400 of fake money, once a day, in US stocks and in crypto. Each has to beat simply buying and holding the index. Built by Aneesh Poolla.</p>
 <p class="meta" id="updated"></p>
+
+<h2>Every bot at a glance</h2>
+<p class="label" id="tiles-label"></p>
+<div id="tiles"></div>
 
 <h2>Live paper trading</h2>
 <p class="label" id="live-since"></p>
@@ -163,6 +178,39 @@ function section(rootId, block, curves, phase) {
     chart(document.getElementById(id), curves, names);
   }
 }
+// One tile per live account, best return first. Every sparkline shares the same dates and dollar range, so they compare directly.
+(function tiles() {
+  const root = document.getElementById('tiles');
+  const names = [...D.markets.stocks, ...D.markets.crypto].filter(n => live.accounts[n] && D.live_curves[n]);
+  if (!names.length) { root.innerHTML = '<p class="empty">No complete trading days yet. Tiles appear after the first live day closes.</p>'; return; }
+  const day = d => new Date(d + 'T12:00:00').getTime();
+  // Each curve starts from $400 the day before its first close.
+  const pts = Object.fromEntries(names.map(n => { const c = D.live_curves[n];
+    return [n, [[day(c.dates[0]) - 864e5, 400], ...c.dates.map((d, i) => [day(d), c.equity[i]])]]; }));
+  const all = Object.values(pts).flat();
+  const x0 = Math.min(...all.map(p => p[0])), x1 = Math.max(...all.map(p => p[0]));
+  let y0 = Math.min(...all.map(p => p[1])), y1 = Math.max(...all.map(p => p[1]));
+  const pad = Math.max((y1 - y0) * 0.08, 0.5); y0 -= pad; y1 += pad;
+  const W = 200, H = 56, X = t => (x1 > x0 ? (t - x0) / (x1 - x0) : 1) * (W - 4) + 2, Y = v => H - 2 - (v - y0) / (y1 - y0) * (H - 4);
+  const marketOf = n => D.markets.crypto.includes(n) ? 'crypto' : 'stocks';
+  const benchOf = n => live.accounts[D.markets[marketOf(n)][2]];
+  names.sort((a, b) => live.accounts[b].total_return - live.accounts[a].total_return);
+  root.innerHTML = '<div class="tiles">' + names.map((n, i) => {
+    const a = live.accounts[n], k = kindOf(n), p = pts[n], last = p[p.length - 1], b = benchOf(n);
+    const line = p.map(([t, v]) => X(t).toFixed(1) + ',' + Y(v).toFixed(1)).join(' ');
+    const vs = k === 'bench' || !b ? 'The index to beat' : (a.total_return >= b.total_return ? 'Ahead of ' : 'Behind ') + 'its index by ' + Math.abs((a.total_return - b.total_return) * 100).toFixed(1) + ' pts';
+    const cls = a.total_return > 0 ? 'up' : a.total_return < 0 ? 'down' : '';
+    const title = D.labels[n] + (k === 'bench' ? '' : ' · ' + marketOf(n));
+    return '<div class="tile"><div class="top"><span class="name">' + esc(title) + '</span><span class="rank">#' + (i + 1) + '</span></div>' +
+      '<div class="v">' + money(a.final_equity) + '</div><div class="r"><b class="' + cls + '">' + pct(a.total_return) + '</b> from $400</div>' +
+      '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="' + esc(title) + ' balance, ' + money(400) + ' to ' + money(a.final_equity) + '">' +
+      '<line x1="0" x2="' + W + '" y1="' + Y(400).toFixed(1) + '" y2="' + Y(400).toFixed(1) + '" stroke="' + css('--line') + '" stroke-width="1" vector-effect="non-scaling-stroke"/>' +
+      '<polyline points="' + line + '" fill="none" stroke="' + COLORS[k] + '" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"' + (k === 'bench' ? ' stroke-dasharray="4 3"' : '') + '/>' +
+      '<line x1="' + X(last[0]).toFixed(1) + '" x2="' + X(last[0]).toFixed(1) + '" y1="' + Y(last[1]).toFixed(1) + '" y2="' + Y(last[1]).toFixed(1) + '" stroke="' + COLORS[k] + '" stroke-width="6" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>' +
+      '<div class="s">' + esc(vs) + ' · ' + a.days + ' trading day' + (a.days === 1 ? '' : 's') + '</div></div>';
+  }).join('') + '</div>';
+  document.getElementById('tiles-label').textContent = 'Live paper accounts ranked by return · every chart uses the same dates and dollar scale · grey line is the $400 start';
+})();
 section('live', live, D.live_curves, 'live');
 section('backtest', bt, D.backtest_curves, 'backtest');
 // Settings the self-tuning layer chose for each live account, and the log of changes.
