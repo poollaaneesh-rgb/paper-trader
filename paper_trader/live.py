@@ -83,7 +83,7 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None):
         for name, (akey, kind) in accounts.items():
             if akey != mkey:
                 continue
-            # An account added after the state was created joins here, at its first run.
+            # An account added after the state was created joins here, on its first run, at the live start.
             a = state["accounts"].setdefault(name, init_state([name])["accounts"][name])
             start = pd.Timestamp(LIVE_START)
             # Never trade before the start, and don't initialise until the first live day has closed: an account

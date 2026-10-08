@@ -13,12 +13,12 @@ Fake money only. Not connected to any brokerage, holds no keys, and is not inves
 | `tournament_stocks`, `tournament_crypto` | 30 US stocks/ETFs, 6 coins | Momentum, mean reversion and trend; capital shifts toward the winners; the self-tuning layer picks the strategy speeds, lookback and cadence |
 | `ml_stocks`, `ml_crypto` | same | Gradient-boosted trees on nine price features, retrained weekly; the self-tuning layer picks how the odds become positions (entry line, exit line, minimum hold, or cash) |
 | `bench_spy`, `bench_btc` | SPY, BTC | Buy and hold, never trades |
-| `bench_eq_stocks`, `bench_eq_crypto` | 30 US stocks/ETFs, 6 coins | Every name at equal weight from the first live day, never rebalanced |
+| `bench_eq_stocks`, `bench_eq_crypto` | the same 30 names, the same 6 coins | Every name bought in equal amounts on the first live day, never rebalanced, never trades again |
 
 ## Method
 
 - **No look-ahead:** decisions use data to the close and fill at the next open. Tests truncate the data and check that no earlier decision changes.
-- **Costs:** 0.05% slippage on stocks; on crypto, a 0.25% fee (Alpaca's tier-one taker fee) plus 0.05% slippage from 2026-10-07, and a 0.5% fee before that.
+- **Costs:** 0.05% slippage on stocks. On crypto, a 0.25% fee plus 0.05% slippage a side (Alpaca's tier-one taker fee) from 2026-10-07; before that, the live ledger and the backtest charged a 0.5% fee plus 0.05%. The self-tuning layer scores crypto settings at the new fee too.
 - **Backtest:** walk-forward 2018-01-01 to 2026-09-30 on prices frozen in `results/backtest/` (Yahoo's adjusted prices shift by about 1e-6 between downloads, which was enough to move the stock ML result between $484 and $965).
 - **Live paper:** from 2026-10-01, one day at a time, by GitHub Actions every evening. Only this record is real evidence, and the live record is never recomputed. One known deviation: the crypto accounts were set up before Sep 30 had closed, so their first fill landed on Sep 30, a day early. Fixed on 2026-10-04; the recorded days stay as they happened.
 
@@ -30,13 +30,13 @@ The layer is a function of price history alone, so the truncation tests cover it
 
 ## Findings so far (backtest)
 
+- **Changed on 2026-10-07:** two live equal-weight benchmark accounts were added (`bench_eq_stocks`, `bench_eq_crypto`) and the crypto ledger fee now matches Alpaca's tier-one taker fee. The equal-weight accounts start on 2026-10-01 like the other benchmarks, so their days before 2026-10-07 were computed when they were added, at the new fee; no bot's record was recomputed. The days recorded before the fee change stay as they happened, and the backtest figures below were computed at the old crypto fee and have not been rerun.
 - **Self-tuning, 2018 to Sep 2026** (`results/backtest/summary.json`, the `_fixed` accounts are the original rules on the same prices): ML stocks $597 fixed → $2,256 tuned; ML crypto $2.75 → $9,761; tournament stocks $1,255 → $1,497; tournament crypto $250 → $2,671. Most of the gain is fees saved by trading less (the fixed ML accounts turned over half the account a day; the tuned ones hold for days). On the history the layer switched settings every 3 to 11 weeks.
 - **What that does not show** (`scripts/controls.py`, `results/backtest/controls.json`): none of the four beat holding its own universe at equal weight from day one ($2,348 stocks, $7,864 crypto; the universe is today's winners). A no-skill control, the model's odds shuffled across names each day and run through the same menu and layer five times, ends at $1,032 to $2,391 on stocks and $735 to $2,261 on crypto: the stock result sits inside that range. The result also moves a lot with the layer's own window and margin (a 63-day window did worst on every account), which marks it as fragile. The menu was chosen knowing fees were the problem. It is still one backtest on a survivor universe.
 
 - The tournament nearly matched the S&P 500 on stocks ($1,255 vs $1,300) with a smaller worst drop (-25% vs -34%) and a higher Sharpe ratio (0.91 vs 0.81). None of that is evidence of skill: the daily return difference from SPY has a t-statistic of -0.27, each Sharpe ratio carries a standard error of about 0.40 over this sample, and the smaller drop mostly reflects a beta of 0.69 to the market. It is one sample period, and the strategy thresholds were never tested out of sample.
 - The ML model's daily up/down calls on stocks are right 53.2% of the time, slightly worse than always guessing "up" (stocks rose on 53.5% of the scored days). It turns over 57% of the stock account a day. Fees decide its result: $2,083 with no fees, $597 at 0.05%, $171 at 0.1%. In crypto, 0.55% per trade took it from $3,620 (no fees) to $2.75.
 - Survivorship bias: the universe is today's large names, which flatters every backtest here.
-- 2026-10-07: two live equal-weight benchmarks joined the record (filled from the first live day, Oct 1, at their first run), and the crypto ledger fee now matches Alpaca's tier-one taker fee. The recorded days before the change stay as they happened; the backtest figures above were run at the old 0.5% fee.
 
 ## Code map
 

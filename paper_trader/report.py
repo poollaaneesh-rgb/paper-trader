@@ -13,12 +13,13 @@ LABELS = {
     "tournament_stocks": "Tournament",
     "ml_stocks": "ML model",
     "bench_spy": "S&P 500 buy-and-hold",
+    "bench_eq_stocks": "Equal-weight buy-and-hold",
     "tournament_crypto": "Tournament",
     "ml_crypto": "ML model",
     "bench_btc": "Bitcoin buy-and-hold",
-    "bench_eq_stocks": "All 30 at equal weight",
-    "bench_eq_crypto": "All 6 coins at equal weight",
+    "bench_eq_crypto": "Equal-weight buy-and-hold",
 }
+# The page reads these as tournament, ML model, the index to beat, then the equal-weight benchmark.
 MARKET_ACCOUNTS = {
     "stocks": ["tournament_stocks", "ml_stocks", "bench_spy", "bench_eq_stocks"],
     "crypto": ["tournament_crypto", "ml_crypto", "bench_btc", "bench_eq_crypto"],

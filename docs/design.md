@@ -6,13 +6,14 @@ Do simple automated strategies beat holding an index after trading costs, in US 
 
 ## Accounts
 
-Six accounts, each starting at $400. A bot "wins" only if it beats its market's buy-and-hold benchmark after costs.
+Eight accounts, each starting at $400. A bot "wins" only if it beats its market's buy-and-hold benchmark after costs. The two equal-weight accounts (added 2026-10-07, starting 2026-10-01 like the other benchmarks) ask a second question: does a bot beat simply owning the whole universe?
 
 | Account | Universe | Engine |
 |---|---|---|
 | `tournament_stocks` / `tournament_crypto` | 30 US stocks and ETFs / 6 coins | Strategy tournament |
 | `ml_stocks` / `ml_crypto` | same | Gradient-boosted trees |
 | `bench_spy` / `bench_btc` | SPY / BTC | Buy and hold |
+| `bench_eq_stocks` / `bench_eq_crypto` | same 30 names / same 6 coins | Every name bought in equal amounts on the first live day, never rebalanced |
 
 ## Engines
 
@@ -46,7 +47,7 @@ Each engine's rules are one point in a small menu of settings (`variants.py`), a
 ## Simulation
 
 - A decision at the close of *t* fills at the open of *t+1* (`simulate.py`).
-- Costs on every trade: 0.05% slippage for stocks; 0.5% fee plus 0.05% slippage for crypto. Fractional units allowed.
+- Costs on every trade: 0.05% slippage for stocks; for crypto a 0.25% fee (Alpaca's tier-one taker fee) plus 0.05% slippage since 2026-10-07, and 0.5% plus 0.05% before that. Fractional units allowed. The fee is a constant read when each day is filled, so changing it affects later fills only; the stored trades and balances of earlier days are never recomputed.
 - Rebalancing skips trades smaller than 1% of equity (and never under $1), so the account doesn't pay costs to chase rounding.
 - A ticker with no usable price that day is left alone and valued at its last close.
 
