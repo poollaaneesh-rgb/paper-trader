@@ -98,3 +98,51 @@ date,ticker,side,units,price,value,cost,realized_pnl,reason,account
 2026-10-06,XRP-USD,buy,87.80065248781551,1.5074470043182373,132.35483056994408,0.7279515681346924,,"model gives 50% odds of a rise; setting: enter above 52% odds, exit below 45%, hold at least 5 days",ml_crypto
 2026-10-06,ETH-USD,buy,0.04882091757364386,2711.027099609375,132.35483056994408,0.7279515681346924,,"model gives 55% odds of a rise; setting: enter above 52% odds, exit below 45%, hold at least 5 days",ml_crypto
 2026-10-06,SOL-USD,buy,1.0961054954957357,120.75008392333984,132.35483056994408,0.7279515681346924,,"model gives 51% odds of a rise; setting: enter above 52% odds, exit below 45%, hold at least 5 days",ml_crypto
+2026-10-07,LLY,sell,0.01173745335898335,1173.6199951171875,13.775309953858255,0.006887654976929128,0.25467686090307434,"no strategy holds it any more under the original strategies, capital re-weighted monthly by the last 21 days after costs",tournament_stocks
+2026-10-07,NVDA,sell,0.11963448301361776,237.69000244140625,28.43592055958318,0.014217960279791591,-0.23357519199056107,"trend hold it under the original strategies, capital re-weighted monthly by the last 21 days after costs",tournament_stocks
+2026-10-07,WMT,sell,0.12884803739059014,107.54000091552734,13.856318058947965,0.006928159029473983,0.3935075320859285,"no strategy holds it any more under the original strategies, capital re-weighted monthly by the last 21 days after costs",tournament_stocks
+2026-10-07,AVGO,buy,0.030118463377174536,372.6000061035156,11.222139638163744,0.005611069819081872,,"trend hold it under the original strategies, capital re-weighted monthly by the last 21 days after costs",tournament_stocks
+2026-10-07,META,buy,0.015617719545015918,738.2899780273438,11.530405819727019,0.00576520290986351,,"momentum and trend hold it under the original strategies, capital re-weighted monthly by the last 21 days after costs",tournament_stocks
+2026-10-07,XLE,buy,0.3821474858256313,64.04000091552734,24.4727253421399,0.01223636267106995,,"momentum and trend hold it under the original strategies, capital re-weighted monthly by the last 21 days after costs",tournament_stocks
+2026-10-07,AMZN,sell,0.3162709269564006,254.22999572753906,80.40555640887054,0.04020277820443527,0.1822311447985633,"model odds now 53%; sold under the setting: enter above 55% odds, exit below 55%, hold at least 10 days",ml_stocks
+2026-10-07,LLY,sell,0.06948788209978435,1173.6199951171875,81.5523678506526,0.0407761839253263,1.5077338450449735,"model odds now 53%; sold under the setting: enter above 55% odds, exit below 55%, hold at least 10 days",ml_stocks
+2026-10-07,META,sell,0.10975528361840718,738.2899780273438,81.03122593101872,0.040515612965509366,0.9907103180531942,"model odds now 54%; sold under the setting: enter above 55% odds, exit below 55%, hold at least 10 days",ml_stocks
+2026-10-07,XLF,buy,1.4986735185229914,53.529998779296875,80.22399161710028,0.04011199580855014,,"model gives 52% odds of a rise; setting: enter above 55% odds, exit below 55%, hold at least 10 days",ml_stocks
+2026-10-07,XOM,buy,0.48444437596791345,165.60000610351562,80.22399161710028,0.04011199580855014,,"model gives 55% odds of a rise; setting: enter above 55% odds, exit below 55%, hold at least 10 days",ml_stocks
+2026-10-07,MA,buy,0.14136635535010503,567.489990234375,80.22399161710028,0.04011199580855014,,"model gives 55% odds of a rise; setting: enter above 55% odds, exit below 55%, hold at least 10 days",ml_stocks
+2026-10-01,V,buy,0.037188976618810266,358.3500061035156,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,IWM,buy,0.048048279139624936,277.3599853515625,13.326669998334157,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,XLF,buy,0.25026610325510157,53.25,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,KO,buy,0.15454794711268657,86.2300033569336,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,AAPL,buy,0.040383848479800484,330.0,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,TLT,buy,0.1732085985893112,76.94000244140625,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,LLY,buy,0.011538242422800138,1155.0,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,AVGO,buy,0.037843732015658015,352.1499938964844,13.326669998334161,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,PG,buy,0.09219418690404586,144.5500030517578,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,MA,buy,0.024186333935270705,551.0,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,XLK,buy,0.06769274307342475,196.8699951171875,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,GLD,buy,0.03489479162772804,381.9100036621094,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,NVDA,buy,0.057947083424257806,229.97999572753906,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,XLV,buy,0.07925465644999223,168.14999389648438,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,COST,buy,0.014630704787481361,910.8699951171875,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,JNJ,buy,0.05054107390969372,263.67999267578125,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,SPY,buy,0.01743507019432034,764.3599853515625,13.326669998334161,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,HD,buy,0.047072412447004525,283.1099853515625,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,XLY,buy,0.12202792885316423,109.20999908447266,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,WMT,buy,0.12767455785593798,104.37999725341797,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,AMZN,buy,0.05296558151904349,251.61000061035156,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,UNH,buy,0.036214762227217985,367.989990234375,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,XOM,buy,0.08251808048504124,161.5,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,META,buy,0.01829254726973452,728.530029296875,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,GOOGL,buy,0.03799044919669529,350.7900085449219,13.326669998334161,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,BRK-B,buy,0.026800744089158692,497.25,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,MSFT,buy,0.02563412686229038,519.8800048828125,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,JPM,buy,0.04073963760603463,327.1180300425678,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,XLE,buy,0.2178984635641404,61.15999984741211,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,QQQ,buy,0.017948135140347474,742.510009765625,13.32666999833416,0.00666333499916708,,"held at equal weight from the first live day, never rebalanced",bench_eq_stocks
+2026-10-01,SOL-USD,buy,0.5633057614719693,117.99500274658203,66.4672648720505,0.1994017946161515,,"held at equal weight from the first live day, never rebalanced",bench_eq_crypto
+2026-10-01,BNB-USD,buy,0.08652500670101625,768.1856079101562,66.4672648720505,0.1994017946161515,,"held at equal weight from the first live day, never rebalanced",bench_eq_crypto
+2026-10-01,XRP-USD,buy,44.65697482668609,1.4883960485458374,66.4672648720505,0.1994017946161515,,"held at equal weight from the first live day, never rebalanced",bench_eq_crypto
+2026-10-01,ADA-USD,buy,269.5434760165049,0.24659200012683868,66.4672648720505,0.1994017946161515,,"held at equal weight from the first live day, never rebalanced",bench_eq_crypto
+2026-10-01,BTC-USD,buy,0.0007954983124383321,83554.25,66.4672648720505,0.1994017946161515,,"held at equal weight from the first live day, never rebalanced",bench_eq_crypto
+2026-10-01,ETH-USD,buy,0.024765925943074366,2683.819091796875,66.4672648720505,0.1994017946161515,,"held at equal weight from the first live day, never rebalanced",bench_eq_crypto
