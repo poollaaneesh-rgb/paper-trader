@@ -48,6 +48,9 @@ def live_summary(skips, states: dict | None = None) -> dict:
         s = metrics.summary(series, trades, 252 if mkey == "stocks" else 365, START_CASH)
         s.update({"market": mkey, "engine": kind, "bankrupt": (states or {}).get(name, {}).get("bankrupt")})
         s["return_30d"] = metrics.trailing_return(series)
+        # The weights it holds from the next open, so the live account can copy it when it holds the seat.
+        pending = (states or {}).get(name, {}).get("pending") or {}
+        s["targets"] = {t: round(float(w), 4) for t, w in pending.items() if w and w > 0}
         out["accounts"][name] = s
     return out
 
