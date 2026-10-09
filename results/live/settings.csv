@@ -5,3 +5,4 @@ date,account,variant,description,reason
 2026-10-05,ml_crypto,ml:in52-out45-hold5,"enter above 52% odds, exit below 45%, hold at least 5 days",first run of the self-tuning layer
 2026-10-06,ml_stocks,ml:in52-out52-hold10,"enter above 52% odds, exit below 52%, hold at least 10 days","ahead of the previous setting by 1.8% over 126 trading days, after costs"
 2026-10-07,ml_stocks,ml:in55-out55-hold10,"enter above 55% odds, exit below 55%, hold at least 10 days","ahead of the previous setting by 11.5% over 126 trading days, after costs"
+2026-10-08,ml_stocks,ml:in55-out52-hold5,"enter above 55% odds, exit below 52%, hold at least 5 days","ahead of the previous setting by 10.5% over 126 trading days, after costs"
