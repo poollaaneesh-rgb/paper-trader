@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-10T10:41+00:00",
+  "generated_at": "2026-10-11T10:50+00:00",
   "live": {
     "phase": "live paper",
     "start": "2026-10-01",
@@ -38,24 +38,24 @@
         }
       },
       "tournament_crypto": {
-        "final_equity": 380.34,
-        "total_return": -0.04915000000000003,
+        "final_equity": 383.89,
+        "total_return": -0.04027500000000006,
         "max_drawdown": -0.07545036742117028,
-        "sharpe": -5.092219215889373,
-        "win_rate": 0.25,
-        "n_trades": 27,
-        "days": 10,
+        "sharpe": -3.7730183231684946,
+        "win_rate": 0.14285714285714285,
+        "n_trades": 31,
+        "days": 11,
         "market": "crypto",
         "engine": "tournament",
         "bankrupt": null,
         "return_30d": null,
         "targets": {
-          "BTC-USD": 0.1409,
-          "ETH-USD": 0.1636,
-          "SOL-USD": 0.2499,
-          "BNB-USD": 0.1409,
-          "XRP-USD": 0.1636,
-          "ADA-USD": 0.1409
+          "BTC-USD": 0.15,
+          "ETH-USD": 0.1778,
+          "SOL-USD": 0.2611,
+          "BNB-USD": 0.15,
+          "XRP-USD": 0.1778,
+          "ADA-USD": 0.0833
         }
       },
       "ml_stocks": {
@@ -79,20 +79,20 @@
         }
       },
       "ml_crypto": {
-        "final_equity": 363.49,
-        "total_return": -0.091275,
+        "final_equity": 365.89,
+        "total_return": -0.08527499999999999,
         "max_drawdown": -0.09804508278475965,
-        "sharpe": -10.708807112359423,
-        "win_rate": 0.5,
-        "n_trades": 7,
-        "days": 10,
+        "sharpe": -9.109762871795908,
+        "win_rate": 0.3333333333333333,
+        "n_trades": 9,
+        "days": 11,
         "market": "crypto",
         "engine": "ml",
         "bankrupt": null,
         "return_30d": null,
         "targets": {
+          "BTC-USD": 0.3333,
           "ETH-USD": 0.3333,
-          "SOL-USD": 0.3333,
           "BNB-USD": 0.3333
         }
       },
@@ -111,13 +111,13 @@
         "targets": {}
       },
       "bench_btc": {
-        "final_equity": 392.7,
-        "total_return": -0.01824999999999999,
+        "final_equity": 394.44,
+        "total_return": -0.013900000000000023,
         "max_drawdown": -0.0555407014899979,
-        "sharpe": -1.5237183335405566,
+        "sharpe": -0.8698935591826401,
         "win_rate": null,
         "n_trades": 1,
-        "days": 10,
+        "days": 11,
         "market": "crypto",
         "engine": "bench",
         "bankrupt": null,
@@ -139,13 +139,13 @@
         "targets": {}
       },
       "bench_eq_crypto": {
-        "final_equity": 380.7,
-        "total_return": -0.048250000000000015,
+        "final_equity": 384.62,
+        "total_return": -0.038449999999999984,
         "max_drawdown": -0.08785096667638204,
-        "sharpe": -4.846184589900978,
+        "sharpe": -3.550482017235413,
         "win_rate": null,
         "n_trades": 6,
-        "days": 9,
+        "days": 10,
         "market": "crypto",
         "engine": "bench_eq",
         "bankrupt": null,
@@ -172,12 +172,19 @@
           "since": "2026-10-05"
         },
         "ml_crypto": {
-          "variant": "ml:in52-out45-hold5",
-          "description": "enter above 52% odds, exit below 45%, hold at least 5 days",
-          "since": "2026-10-05"
+          "variant": "ml:in52-out52-hold10",
+          "description": "enter above 52% odds, exit below 52%, hold at least 10 days",
+          "since": "2026-10-10"
         }
       },
       "changes": [
+        {
+          "date": "2026-10-10",
+          "account": "ml_crypto",
+          "variant": "ml:in52-out52-hold10",
+          "description": "enter above 52% odds, exit below 52%, hold at least 10 days",
+          "reason": "ahead of the previous setting by 3.1% over 126 trading days, after costs"
+        },
         {
           "date": "2026-10-08",
           "account": "ml_stocks",
