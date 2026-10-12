@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-11T10:50+00:00",
+  "generated_at": "2026-10-12T12:01+00:00",
   "live": {
     "phase": "live paper",
     "start": "2026-10-01",
@@ -38,24 +38,24 @@
         }
       },
       "tournament_crypto": {
-        "final_equity": 383.89,
-        "total_return": -0.04027500000000006,
+        "final_equity": 387.15,
+        "total_return": -0.03212500000000007,
         "max_drawdown": -0.07545036742117028,
-        "sharpe": -3.7730183231684946,
-        "win_rate": 0.14285714285714285,
-        "n_trades": 31,
-        "days": 11,
+        "sharpe": -2.7366103083649733,
+        "win_rate": 0.25,
+        "n_trades": 34,
+        "days": 12,
         "market": "crypto",
         "engine": "tournament",
         "bankrupt": null,
         "return_30d": null,
         "targets": {
-          "BTC-USD": 0.15,
-          "ETH-USD": 0.1778,
-          "SOL-USD": 0.2611,
-          "BNB-USD": 0.15,
-          "XRP-USD": 0.1778,
-          "ADA-USD": 0.0833
+          "BTC-USD": 0.0594,
+          "ETH-USD": 0.2177,
+          "SOL-USD": 0.2771,
+          "BNB-USD": 0.1688,
+          "XRP-USD": 0.2177,
+          "ADA-USD": 0.0594
         }
       },
       "ml_stocks": {
@@ -79,20 +79,20 @@
         }
       },
       "ml_crypto": {
-        "final_equity": 365.89,
-        "total_return": -0.08527499999999999,
+        "final_equity": 368.39,
+        "total_return": -0.07902500000000001,
         "max_drawdown": -0.09804508278475965,
-        "sharpe": -9.109762871795908,
-        "win_rate": 0.3333333333333333,
-        "n_trades": 9,
-        "days": 11,
+        "sharpe": -7.791486445318744,
+        "win_rate": 0.25,
+        "n_trades": 11,
+        "days": 12,
         "market": "crypto",
         "engine": "ml",
         "bankrupt": null,
         "return_30d": null,
         "targets": {
-          "BTC-USD": 0.3333,
           "ETH-USD": 0.3333,
+          "SOL-USD": 0.3333,
           "BNB-USD": 0.3333
         }
       },
@@ -111,13 +111,13 @@
         "targets": {}
       },
       "bench_btc": {
-        "final_equity": 394.44,
-        "total_return": -0.013900000000000023,
+        "final_equity": 398.09,
+        "total_return": -0.004775000000000085,
         "max_drawdown": -0.0555407014899979,
-        "sharpe": -0.8698935591826401,
+        "sharpe": 0.30790124931794255,
         "win_rate": null,
         "n_trades": 1,
-        "days": 11,
+        "days": 12,
         "market": "crypto",
         "engine": "bench",
         "bankrupt": null,
@@ -139,13 +139,13 @@
         "targets": {}
       },
       "bench_eq_crypto": {
-        "final_equity": 384.62,
-        "total_return": -0.038449999999999984,
+        "final_equity": 388.05,
+        "total_return": -0.029874999999999985,
         "max_drawdown": -0.08785096667638204,
-        "sharpe": -3.550482017235413,
+        "sharpe": -2.5768431148025894,
         "win_rate": null,
         "n_trades": 6,
-        "days": 10,
+        "days": 11,
         "market": "crypto",
         "engine": "bench_eq",
         "bankrupt": null,
@@ -167,9 +167,9 @@
           "since": "2026-10-08"
         },
         "tournament_crypto": {
-          "variant": "tour:default-21-D-net",
-          "description": "the original strategies, capital re-weighted daily by the last 21 days after costs",
-          "since": "2026-10-05"
+          "variant": "tour:default-63-M-net",
+          "description": "the original strategies, capital re-weighted monthly by the last 63 days after costs",
+          "since": "2026-10-11"
         },
         "ml_crypto": {
           "variant": "ml:in52-out52-hold10",
@@ -178,6 +178,13 @@
         }
       },
       "changes": [
+        {
+          "date": "2026-10-11",
+          "account": "tournament_crypto",
+          "variant": "tour:default-63-M-net",
+          "description": "the original strategies, capital re-weighted monthly by the last 63 days after costs",
+          "reason": "ahead of the previous setting by 2.1% over 126 trading days, after costs"
+        },
         {
           "date": "2026-10-10",
           "account": "ml_crypto",

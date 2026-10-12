@@ -79,34 +79,34 @@
       "variant": "tour:default-21-M-net"
     },
     "tournament_crypto": {
-      "cash": 0.0,
+      "cash": 11.76978828225491,
       "positions": {
-        "BNB-USD": 0.06765338915658187,
+        "BNB-USD": 0.0765720881972685,
         "ETH-USD": 0.025732794656762356,
         "BTC-USD": 0.0006474371198163223,
-        "SOL-USD": 0.8683043757303391,
-        "ADA-USD": 220.00745769181222,
+        "SOL-USD": 0.9082480009832554,
+        "ADA-USD": 127.9358240105599,
         "XRP-USD": 46.12702840572045
       },
       "avg_cost": {
-        "BNB-USD": 758.5941034616716,
+        "BNB-USD": 757.8280743721735,
         "ETH-USD": 2650.8024088653083,
         "BTC-USD": 83140.64497488017,
-        "SOL-USD": 116.11586106155963,
+        "SOL-USD": 115.8629073342876,
         "ADA-USD": 0.24784459184733748,
         "XRP-USD": 1.4412392842212993
       },
       "pending": {
-        "BTC-USD": 0.15,
-        "ETH-USD": 0.17777777777777776,
-        "SOL-USD": 0.26111111111111107,
-        "BNB-USD": 0.15,
-        "XRP-USD": 0.17777777777777776,
-        "ADA-USD": 0.08333333333333333
+        "BTC-USD": 0.059359644531366926,
+        "ETH-USD": 0.21770845386227614,
+        "SOL-USD": 0.27706809839364305,
+        "BNB-USD": 0.16879570481907086,
+        "XRP-USD": 0.21770845386227614,
+        "ADA-USD": 0.059359644531366926
       },
-      "last_date": "2026-10-10",
+      "last_date": "2026-10-11",
       "initialised": true,
-      "variant": "tour:default-21-D-net"
+      "variant": "tour:default-63-M-net"
     },
     "ml_stocks": {
       "cash": 4.122149907308682,
@@ -161,26 +161,26 @@
       "variant": "ml:in55-out52-hold5"
     },
     "ml_crypto": {
-      "cash": 0.9823322395512406,
+      "cash": 0.0,
       "positions": {
         "ETH-USD": 0.04882091757364386,
-        "SOL-USD": 1.0961054954957357,
-        "BNB-USD": 0.16278231408183422
+        "BNB-USD": 0.16278231408183422,
+        "BTC-USD": 0.0014577682958535933
       },
       "avg_cost": {
         "ETH-USD": 2725.9377486572266,
-        "SOL-USD": 121.41420938491822,
-        "BNB-USD": 744.320704650879
+        "BNB-USD": 744.320704650879,
+        "BTC-USD": 83160.9632421875
       },
       "pending": {
-        "BTC-USD": 0.3333333333333333,
+        "BTC-USD": 0.0,
         "ETH-USD": 0.3333333333333333,
-        "SOL-USD": 0.0,
+        "SOL-USD": 0.3333333333333333,
         "BNB-USD": 0.3333333333333333,
         "XRP-USD": 0.0,
         "ADA-USD": 0.0
       },
-      "last_date": "2026-10-10",
+      "last_date": "2026-10-11",
       "initialised": true,
       "variant": "ml:in52-out52-hold10"
     },
@@ -205,7 +205,7 @@
         "BTC-USD": 84081.31612890626
       },
       "pending": null,
-      "last_date": "2026-10-10",
+      "last_date": "2026-10-11",
       "initialised": true
     },
     "bench_eq_stocks": {
@@ -299,7 +299,7 @@
         "ETH-USD": 2691.8705490722655
       },
       "pending": null,
-      "last_date": "2026-10-10",
+      "last_date": "2026-10-11",
       "initialised": true,
       "variant": null,
       "bankrupt": null
