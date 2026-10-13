@@ -1,18 +1,18 @@
 {
-  "generated_at": "2026-10-12T12:01+00:00",
+  "generated_at": "2026-10-13T11:49+00:00",
   "live": {
     "phase": "live paper",
     "start": "2026-10-01",
     "start_cash": 400.0,
     "accounts": {
       "tournament_stocks": {
-        "final_equity": 407.02,
-        "total_return": 0.017549999999999955,
+        "final_equity": 409.7,
+        "total_return": 0.024249999999999883,
         "max_drawdown": -0.002498268526763603,
-        "sharpe": 14.240879828204637,
-        "win_rate": 0.7105263157894737,
-        "n_trades": 95,
-        "days": 7,
+        "sharpe": 16.57444208814742,
+        "win_rate": 0.7380952380952381,
+        "n_trades": 102,
+        "days": 8,
         "market": "stocks",
         "engine": "tournament",
         "bankrupt": null,
@@ -38,54 +38,54 @@
         }
       },
       "tournament_crypto": {
-        "final_equity": 387.15,
-        "total_return": -0.03212500000000007,
-        "max_drawdown": -0.07545036742117028,
-        "sharpe": -2.7366103083649733,
-        "win_rate": 0.25,
-        "n_trades": 34,
-        "days": 12,
+        "final_equity": 370.17,
+        "total_return": -0.07457499999999995,
+        "max_drawdown": -0.09024552090245519,
+        "sharpe": -5.477421960871512,
+        "win_rate": 0.4,
+        "n_trades": 40,
+        "days": 13,
         "market": "crypto",
         "engine": "tournament",
         "bankrupt": null,
         "return_30d": null,
         "targets": {
-          "BTC-USD": 0.0594,
+          "BTC-USD": 0.0791,
           "ETH-USD": 0.2177,
-          "SOL-USD": 0.2771,
-          "BNB-USD": 0.1688,
+          "SOL-USD": 0.2177,
+          "BNB-USD": 0.1094,
           "XRP-USD": 0.2177,
-          "ADA-USD": 0.0594
+          "ADA-USD": 0.0791
         }
       },
       "ml_stocks": {
-        "final_equity": 410.78,
-        "total_return": 0.02695000000000003,
+        "final_equity": 413.04,
+        "total_return": 0.03259999999999996,
         "max_drawdown": -0.0035411471321695753,
-        "sharpe": 9.613833097376768,
-        "win_rate": 0.6666666666666666,
-        "n_trades": 35,
-        "days": 7,
+        "sharpe": 11.029396883788348,
+        "win_rate": 0.7222222222222222,
+        "n_trades": 41,
+        "days": 8,
         "market": "stocks",
         "engine": "ml",
         "bankrupt": null,
         "return_30d": null,
         "targets": {
-          "XLE": 0.2,
-          "XLV": 0.2,
-          "GOOGL": 0.2,
+          "NVDA": 0.2,
+          "AMZN": 0.2,
+          "V": 0.2,
           "JNJ": 0.2,
-          "LLY": 0.2
+          "AVGO": 0.2
         }
       },
       "ml_crypto": {
-        "final_equity": 368.39,
-        "total_return": -0.07902500000000001,
-        "max_drawdown": -0.09804508278475965,
-        "sharpe": -7.791486445318744,
-        "win_rate": 0.25,
-        "n_trades": 11,
-        "days": 12,
+        "final_equity": 353.58,
+        "total_return": -0.11604999999999999,
+        "max_drawdown": -0.11834230999401563,
+        "sharpe": -9.807561142641052,
+        "win_rate": 0.4,
+        "n_trades": 13,
+        "days": 13,
         "market": "crypto",
         "engine": "ml",
         "bankrupt": null,
@@ -97,13 +97,13 @@
         }
       },
       "bench_spy": {
-        "final_equity": 407.23,
-        "total_return": 0.018075000000000063,
+        "final_equity": 406.99,
+        "total_return": 0.01747500000000013,
         "max_drawdown": -0.006601226993865006,
-        "sharpe": 9.87290219239601,
+        "sharpe": 8.590529596690207,
         "win_rate": null,
         "n_trades": 1,
-        "days": 7,
+        "days": 8,
         "market": "stocks",
         "engine": "bench",
         "bankrupt": null,
@@ -111,13 +111,13 @@
         "targets": {}
       },
       "bench_btc": {
-        "final_equity": 398.09,
-        "total_return": -0.004775000000000085,
+        "final_equity": 388.97,
+        "total_return": -0.027574999999999905,
         "max_drawdown": -0.0555407014899979,
-        "sharpe": 0.30790124931794255,
+        "sharpe": -2.134952107074286,
         "win_rate": null,
         "n_trades": 1,
-        "days": 12,
+        "days": 13,
         "market": "crypto",
         "engine": "bench",
         "bankrupt": null,
@@ -125,13 +125,13 @@
         "targets": {}
       },
       "bench_eq_stocks": {
-        "final_equity": 410.49,
-        "total_return": 0.026224999999999943,
+        "final_equity": 412.27,
+        "total_return": 0.030675000000000008,
         "max_drawdown": 0.0,
-        "sharpe": 23.25132728604797,
+        "sharpe": 25.174757862900496,
         "win_rate": null,
         "n_trades": 30,
-        "days": 7,
+        "days": 8,
         "market": "stocks",
         "engine": "bench_eq",
         "bankrupt": null,
@@ -139,13 +139,13 @@
         "targets": {}
       },
       "bench_eq_crypto": {
-        "final_equity": 388.05,
-        "total_return": -0.029874999999999985,
-        "max_drawdown": -0.08785096667638204,
-        "sharpe": -2.5768431148025894,
+        "final_equity": 371.05,
+        "total_return": -0.07237499999999997,
+        "max_drawdown": -0.09878072476440303,
+        "sharpe": -5.219947905268436,
         "win_rate": null,
         "n_trades": 6,
-        "days": 11,
+        "days": 12,
         "market": "crypto",
         "engine": "bench_eq",
         "bankrupt": null,
@@ -162,9 +162,9 @@
           "since": "2026-10-05"
         },
         "ml_stocks": {
-          "variant": "ml:in55-out52-hold5",
-          "description": "enter above 55% odds, exit below 52%, hold at least 5 days",
-          "since": "2026-10-08"
+          "variant": "ml:in55-out55-hold10",
+          "description": "enter above 55% odds, exit below 55%, hold at least 10 days",
+          "since": "2026-10-12"
         },
         "tournament_crypto": {
           "variant": "tour:default-63-M-net",
@@ -178,6 +178,13 @@
         }
       },
       "changes": [
+        {
+          "date": "2026-10-12",
+          "account": "ml_stocks",
+          "variant": "ml:in55-out55-hold10",
+          "description": "enter above 55% odds, exit below 55%, hold at least 10 days",
+          "reason": "ahead of the previous setting by 7.0% over 126 trading days, after costs"
+        },
         {
           "date": "2026-10-11",
           "account": "tournament_crypto",
