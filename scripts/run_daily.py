@@ -60,13 +60,22 @@ def main():
     LIVE.mkdir(parents=True, exist_ok=True)
     state_path = LIVE / "state.json"
     state = json.loads(state_path.read_text()) if state_path.exists() else live.init_state()
-    panels = {}
+    panels, splits = {}, {}
     for k, m in MARKETS.items():
         try:
-            panels[k] = data.complete_days(data.fetch(m, DATA_START), today)
+            fresh = data.complete_days(data.fetch(m, DATA_START), today)
         except Exception as exc:  # a failed source skips that market; it never trades on bad data
             print(f"{k}: fetch failed: {exc}")
             panels[k] = None
+            continue
+        # The days already used are kept as first downloaded (see data.freeze); only new days are added.
+        path = LIVE / f"prices_{k}.csv"
+        raw, scale = data.load_frozen(path)
+        panels[k], raw, scale, splits[k] = data.freeze(fresh, raw, scale)
+        data.save_frozen(path, raw, scale)
+        if splits[k]:
+            print(f"{k}: split detected: {splits[k]}")
+    live.apply_splits(state, splits, today)
     state, eq_rows, trade_rows, setting_rows = live.run(state, panels, today)
     _append(LIVE / "equity.csv", eq_rows)
     _append(LIVE / "trades.csv", trade_rows)
