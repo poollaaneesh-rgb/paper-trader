@@ -9,6 +9,7 @@ from paper_trader.config import BANKRUPT_AT, FEE_CHANGE_NOTE, LIVE_START, MARKET
 from paper_trader.portfolio import Account
 
 STALE_DAYS = {"stocks": 5, "crypto": 1}  # max calendar days between the last candle and yesterday
+FEE_CHANGE_UNTIL = pd.Timestamp("2026-10-07")  # the last close a crypto switch can owe to the fee change
 BENCH_KINDS = {"bench", "bench_eq"}  # benchmarks buy once and hold; they never go bankrupt by trading
 BANKRUPT_REASON = (
     f"bankrupt: the account fell under ${BANKRUPT_AT:.2f}, the smallest order; it sells what is left and stops for good"
@@ -43,7 +44,30 @@ def stale_reason(market_key: str, panel, today) -> str | None:
     last = panel.dates.max()
     if (yesterday - last).days > STALE_DAYS[market_key]:
         return f"latest candle is {last.date()}, expected {yesterday.date()} or close to it"
+    # One ticker without a close would be marked at $0 (a holding) or sold for missing data (a target), and the
+    # night is never reprocessed; wait for the source to fill it.
+    missing = [t for t in panel.tickers if pd.isna(panel.close.at[last, t])]
+    if missing:
+        return f"no close for {', '.join(missing)} on {last.date()}"
     return None
+
+
+def apply_splits(state: dict, splits: dict, today, accounts=None) -> None:
+    """Rescales every account's units and cost basis for a split in tonight's download (price ratio r: units / r)."""
+    accounts = accounts or engines.ACCOUNTS
+    for mkey, ratios in (splits or {}).items():
+        for name, (akey, _) in accounts.items():
+            a = state["accounts"].get(name)
+            if akey != mkey or not a:
+                continue
+            for t, r in ratios.items():
+                if t in a["positions"]:
+                    a["positions"][t] = a["positions"][t] / r
+                    if t in a["avg_cost"]:
+                        a["avg_cost"][t] = a["avg_cost"][t] * r
+        for t, r in ratios.items():
+            row = {"run": str(pd.Timestamp(today).date()), "ticker": t, "price_ratio": r}
+            state.setdefault("splits", []).append(row)
 
 
 def _series(d: dict | None):
@@ -69,7 +93,8 @@ def _setting_change(a: dict, name: str, mkey: str, d, diag: dict) -> dict | None
         s = diag["scores"]
         lead = float(s.at[d, vid] - s.at[d, prev]) if prev in s.columns else float("nan")
         window = selftune.WINDOW
-        if mkey == "crypto" and not (lead >= selftune.MARGIN):  # also true when the lead is NaN
+        # Only the runs that first scored at the 2026-10-07 crypto fee; any later sub-margin switch says what it is.
+        if mkey == "crypto" and not (lead >= selftune.MARGIN) and d <= FEE_CHANGE_UNTIL:  # also when the lead is NaN
             reason = FEE_CHANGE_NOTE
         else:
             reason = f"ahead of the previous setting by {lead * 100:.1f}% over {window} trading days, after costs"
