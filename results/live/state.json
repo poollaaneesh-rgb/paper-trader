@@ -83,13 +83,13 @@
       "variant": "tour:default-21-M-net"
     },
     "tournament_crypto": {
-      "cash": 61.81893811722202,
+      "cash": 57.74391402120533,
       "positions": {
         "BNB-USD": 0.04416948074589534,
         "ETH-USD": 0.02943265801329899,
         "BTC-USD": 0.00035724996810377176,
         "SOL-USD": 0.6828616936754097,
-        "ADA-USD": 125.29350024493519,
+        "ADA-USD": 143.80966598304641,
         "XRP-USD": 54.36526413992479
       },
       "avg_cost": {
@@ -97,7 +97,7 @@
         "ETH-USD": 2626.518689049216,
         "BTC-USD": 82876.05910688083,
         "SOL-USD": 115.62594494815522,
-        "ADA-USD": 0.24400087299312018,
+        "ADA-USD": 0.24092085395865578,
         "XRP-USD": 1.43494237486234
       },
       "pending": {
@@ -108,7 +108,7 @@
         "XRP-USD": 0.19582124180473526,
         "ADA-USD": 0.08754884823016316
       },
-      "last_date": "2026-10-17",
+      "last_date": "2026-10-18",
       "initialised": true,
       "variant": "tour:default-63-M-net"
     },
@@ -184,7 +184,7 @@
         "XRP-USD": 0.3333333333333333,
         "ADA-USD": 0.0
       },
-      "last_date": "2026-10-17",
+      "last_date": "2026-10-18",
       "initialised": true,
       "variant": "ml:in52-out52-hold10"
     },
@@ -209,7 +209,7 @@
         "BTC-USD": 84081.31612890626
       },
       "pending": null,
-      "last_date": "2026-10-17",
+      "last_date": "2026-10-18",
       "initialised": true
     },
     "bench_eq_stocks": {
@@ -303,7 +303,7 @@
         "ETH-USD": 2691.8705490722655
       },
       "pending": null,
-      "last_date": "2026-10-17",
+      "last_date": "2026-10-18",
       "initialised": true,
       "variant": null,
       "bankrupt": null
