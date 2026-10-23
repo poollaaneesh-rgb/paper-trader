@@ -12,3 +12,4 @@ date,account,variant,description,reason
 2026-10-13,ml_stocks,ml:in52-out52-hold5,"enter above 52% odds, exit below 52%, hold at least 5 days","ahead of the previous setting by 13.9% over 126 trading days, after costs"
 2026-10-15,ml_stocks,ml:in52-out52-hold10,"enter above 52% odds, exit below 52%, hold at least 10 days","ahead of the previous setting by 9.9% over 126 trading days, after costs"
 2026-10-19,tournament_crypto,tour:default-21-D-net,"the original strategies, capital re-weighted daily by the last 21 days after costs","ahead of the previous setting by 2.5% over 126 trading days, after costs"
+2026-10-22,ml_stocks,ml:in55-out48-hold10,"enter above 55% odds, exit below 48%, hold at least 10 days","ahead of the previous setting by 2.3% over 126 trading days, after costs"
