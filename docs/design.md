@@ -44,6 +44,14 @@ Each engine's rules are one point in a small menu of settings (`variants.py`), a
 - **Backtest and controls:** `scripts/backtest.py` simulates each tuned account and, from the same menu, its original fixed rules (`*_fixed`). `scripts/controls.py` adds the bars a tuned result must clear: the universe held at equal weight from day one, and the model's odds shuffled across names each day through the same menu and layer (five runs).
 - **Why the three numbers are fixed:** the window, margin and menus were set before any result was seen, so the layer itself is not tuned on the test period. Changing them after seeing results would turn the backtest into a fit.
 
+## Crypto trend gate (2026-10-25)
+
+After three live weeks the crypto tournament (-9.7%) and ML (-13.2%) accounts trailed Bitcoin held (-3.6%), tracking the equal-weight coin basket (-10%) down. Their worst backtest years were the same failure at scale: holding alt coins through the 2018 and 2022 bear markets. From 2026-10-25 both hold coins only while Bitcoin is in an uptrend (`config.CRYPTO_GATE`): in after a close 3% above its 100-day average, out to cash after a close 3% below it. The gate multiplies the tuned weights after the self-tuning layer has chosen, so the layer's scoring is unchanged, and it is a function of closes alone, so the truncation tests cover it (`tests/test_gate.py`).
+
+- **How it was picked:** 100 and 50 days were tied on 2018-2021 Sharpe for the ML account; 100 days with a 3% band had the higher return, and the 50-day gate failed out of sample on the tournament (-4%). Every 100 to 200 day setting beat no gate on 2022 to Sep 2026 for both engines.
+- **2022 to Sep 2026, after costs:** ML -11% ungated, +181% gated; tournament -51% ungated, +8% gated; Bitcoin held +77%; the six coins at equal weight +24%.
+- **What it does not do:** it would not have changed October 2026 (Bitcoin stayed above its 100-day average), and in 2024 it trailed holding. It was chosen after the live losses were seen, so the live record from Oct 26 is its real test.
+
 ## Simulation
 
 - A decision at the close of *t* fills at the open of *t+1* (`simulate.py`).

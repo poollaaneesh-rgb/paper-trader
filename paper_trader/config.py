@@ -79,3 +79,12 @@ CRYPTO = Market(
 )
 
 MARKETS = {"stocks": STOCKS, "crypto": CRYPTO}
+
+# Crypto trend gate (2026-10-25): the crypto tournament and ML accounts hold coins only while Bitcoin is in an uptrend.
+# In at a close 3% above its 100-day average, out at a close 3% below it, unchanged in between. Both crypto bots lost
+# more than Bitcoin in their first live weeks, and in the backtest their losses came from riding alt coins down through
+# bear markets (2018, 2022). The ML model's best setting on 2018-2021; on 2022 to Sep 2026 it turned the ML account
+# from -11% to +181% and the tournament from -51% to +8% after costs, mostly by sitting out 2022. It is crash
+# insurance, not an edge in a rally: in 2024 it trailed holding. The self-tuning layer still scores its settings
+# ungated; the gate applies after it, in engines.targets.
+CRYPTO_GATE = {"ticker": "BTC-USD", "days": 100, "band": 0.03}
