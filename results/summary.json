@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-25T09:13+00:00",
+  "generated_at": "2026-10-26T10:10+00:00",
   "live": {
     "phase": "live paper",
     "start": "2026-10-01",
@@ -40,23 +40,23 @@
         }
       },
       "tournament_crypto": {
-        "final_equity": 360.36,
-        "total_return": -0.09909999999999997,
-        "max_drawdown": -0.11435523114355228,
-        "sharpe": -4.627742576529078,
+        "final_equity": 357.71,
+        "total_return": -0.10572500000000007,
+        "max_drawdown": -0.12086804787534722,
+        "sharpe": -4.8724772206025655,
         "win_rate": 0.15384615384615385,
-        "n_trades": 63,
-        "days": 25,
+        "n_trades": 64,
+        "days": 26,
         "market": "crypto",
         "engine": "tournament",
         "bankrupt": null,
         "return_30d": null,
         "targets": {
-          "BTC-USD": 0.1111,
-          "ETH-USD": 0.1111,
-          "SOL-USD": 0.2222,
+          "BTC-USD": 0.0833,
+          "ETH-USD": 0.0833,
+          "SOL-USD": 0.1944,
           "XRP-USD": 0.1111,
-          "ADA-USD": 0.1111
+          "ADA-USD": 0.1944
         }
       },
       "ml_stocks": {
@@ -80,13 +80,13 @@
         }
       },
       "ml_crypto": {
-        "final_equity": 347.08,
-        "total_return": -0.13230000000000008,
+        "final_equity": 345.49,
+        "total_return": -0.13627499999999992,
         "max_drawdown": -0.14195591462198287,
-        "sharpe": -6.3813844021677655,
+        "sharpe": -6.461256583152918,
         "win_rate": 0.25,
         "n_trades": 19,
-        "days": 25,
+        "days": 26,
         "market": "crypto",
         "engine": "ml",
         "bankrupt": null,
@@ -112,13 +112,13 @@
         "targets": {}
       },
       "bench_btc": {
-        "final_equity": 384.35,
-        "total_return": -0.039124999999999965,
-        "max_drawdown": -0.06577380228968666,
-        "sharpe": -1.7361929973563095,
+        "final_equity": 380.7,
+        "total_return": -0.048250000000000015,
+        "max_drawdown": -0.07464573053644796,
+        "sharpe": -2.205445512722917,
         "win_rate": null,
         "n_trades": 1,
-        "days": 25,
+        "days": 26,
         "market": "crypto",
         "engine": "bench",
         "bankrupt": null,
@@ -140,13 +140,13 @@
         "targets": {}
       },
       "bench_eq_crypto": {
-        "final_equity": 358.17,
-        "total_return": -0.10457499999999997,
-        "max_drawdown": -0.1300641212474497,
-        "sharpe": -4.457631671996627,
+        "final_equity": 354.91,
+        "total_return": -0.11272499999999996,
+        "max_drawdown": -0.13798212377343821,
+        "sharpe": -4.730417690371375,
         "win_rate": null,
         "n_trades": 6,
-        "days": 24,
+        "days": 25,
         "market": "crypto",
         "engine": "bench_eq",
         "bankrupt": null,
