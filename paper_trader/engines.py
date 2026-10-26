@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 from paper_trader import ml, selftune, variants
-from paper_trader.config import ML_THRESHOLD
+from paper_trader.config import CRYPTO_GATE, ML_THRESHOLD
 from paper_trader.strategies import STRATEGIES
 
 ACCOUNTS = {
@@ -41,8 +41,45 @@ def _hold_once(panel, start, weights: dict[str, float]) -> pd.DataFrame:
     return w
 
 
+def trend_gate(panel, ticker: str, days: int, band: float) -> pd.Series:
+    """1.0 while `ticker` is in an uptrend, else 0.0: in at a close `band` above its `days`-day average, out at a close
+    `band` below it, unchanged in between. Out until the average exists. Reads closes up to each day only."""
+    close = panel.close[ticker].ffill()
+    avg = close.rolling(days, min_periods=days).mean()
+    gate = pd.Series(np.nan, index=panel.dates)
+    gate[close > avg * (1 + band)] = 1.0
+    gate[close < avg * (1 - band)] = 0.0
+    return gate.ffill().fillna(0.0)
+
+
+def _gated(kind: str, market, panel, w: pd.DataFrame, explain, diag: dict):
+    """The crypto tournament and ML accounts hold nothing while Bitcoin is in a downtrend (config.CRYPTO_GATE)."""
+    if market.name != "crypto" or CRYPTO_GATE["ticker"] not in panel.tickers:
+        return w, explain, diag
+    g = CRYPTO_GATE
+    gate = trend_gate(panel, g["ticker"], g["days"], g["band"])
+    coin = g["ticker"].split("-")[0]
+    off = (
+        f"{coin} is in a downtrend (its close fell {g['band']:.0%} under its {g['days']}-day average): "
+        "the account waits in cash"
+    )
+
+    def gated_explain(d, t, side):
+        return off if side == "sell" and gate.get(d, 1.0) == 0.0 else explain(d, t, side)
+
+    diag["gate"] = gate
+    return w.mul(gate.reindex(w.index).fillna(0.0), axis=0), gated_explain, diag
+
+
 def targets(kind: str, market, panel, start):
     """Return (weights, explain(decision_date, ticker, side) -> str, diagnostics)."""
+    w, explain, diag = _targets(kind, market, panel, start)
+    if kind in ("tournament", "ml"):
+        return _gated(kind, market, panel, w, explain, diag)
+    return w, explain, diag
+
+
+def _targets(kind: str, market, panel, start):
     start = pd.Timestamp(start)
     if kind == "bench":
         w = _hold_once(panel, start, {market.benchmark: 1.0})
