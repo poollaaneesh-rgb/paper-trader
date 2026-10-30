@@ -134,6 +134,38 @@ def _targets(kind: str, market, panel, start):
     return w, explain, diag
 
 
+def challenger_targets(kind: str, market, panel, definition: dict, diag: dict):
+    """Return (weights, explain) for a setting written by the nightly review (challengers.py).
+
+    The weights come from the same functions as the menus, and the crypto gate applies to them as it does to the
+    account's own. `diag` is the account's from targets(): the ML setting reuses its model odds.
+    """
+    setting = variants.describe_definition(kind, definition)
+    if kind == "ml":
+        probs = diag["probs"]
+        w = variants.ml_definition(probs, market.max_positions, definition)
+
+        def explain(d, t, side):
+            p = probs.at[d, t] if d in probs.index else np.nan
+            if np.isnan(p):
+                return f"no model odds for it that day; setting: {setting}"
+            if side == "buy":
+                return f"model gives {p:.0%} odds of a rise; setting: {setting}"
+            return f"model odds now {p:.0%}; sold under the setting: {setting}"
+
+    else:
+        w, per = variants.tournament_definition(panel, market.max_positions, market.cost_rate, definition)
+
+        def explain(d, t, side):
+            holders = [name.replace("_", " ") for name, wts in per.items() if wts.at[d, t] > 0]
+            if holders:
+                return f"{' and '.join(holders)} hold it under {setting}"
+            return f"no strategy holds it any more under {setting}"
+
+    w, explain, _ = _gated(kind, market, panel, w, explain, {})
+    return w, explain
+
+
 def _diag(chosen: pd.Series, scores: pd.DataFrame, start, fixed_weights: pd.DataFrame) -> dict:
     return {
         "chosen": chosen,

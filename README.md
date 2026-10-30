@@ -28,6 +28,8 @@ Each engine has a fixed menu of settings (`paper_trader/variants.py`): 38 for th
 
 The layer is a function of price history alone, so the truncation tests cover it: run it on data cut off at day *t* and the choice for *t* does not change. Each change the live accounts make is logged in `results/live/settings.csv` with its reason and shown on the page; the live record itself is never recomputed.
 
+Since 2026-10-29 a nightly review of each bot's trades can propose a new setting, but only as a challenger in `results/live/challengers.json` (`paper_trader/challengers.py`, at most two per account, engine settings only: never cash, costs, sizing or the universe). A challenger starts from a copy of its account on the day it is added and is scored only on the days after it, never on history its author had already seen; its daily equity goes to `results/live/challengers.csv`. After at least 30 trading days, one ahead of the live account by 2% (log return over exactly those days) takes over through the settings log, and one 2% behind, or still short after 120 days, is retired.
+
 ## Findings so far (backtest)
 
 - **Changed on 2026-10-07:** two live equal-weight benchmark accounts were added (`bench_eq_stocks`, `bench_eq_crypto`) and the crypto ledger fee now matches Alpaca's tier-one taker fee. The equal-weight accounts start on 2026-10-01 like the other benchmarks, so their days before 2026-10-07 were computed when they were added, at the new fee; no bot's record was recomputed. The days recorded before the fee change stay as they happened, and the backtest figures below were computed at the old crypto fee and have not been rerun.
@@ -46,6 +48,7 @@ The layer is a function of price history alone, so the truncation tests cover it
 | `paper_trader/tournament.py` | Capital allocation across the three strategies by trailing Sharpe, at a chosen lookback and cadence |
 | `paper_trader/features.py`, `ml.py` | Nine price features, the forward label, weekly walk-forward retraining |
 | `paper_trader/variants.py`, `selftune.py` | The menus of settings per engine, and the layer that follows the leader after costs |
+| `paper_trader/challengers.py` | Settings proposed by the nightly review, run forward from the day they are added and adopted past the same bar |
 | `paper_trader/portfolio.py`, `simulate.py` | Cash-and-units account with costs; next-open fills |
 | `paper_trader/live.py`, `data.py` | Nightly step-forward with stale-data guards; yfinance plus Coinbase fallback |
 | `paper_trader/metrics.py`, `report.py` | Scorecard numbers and the static results page |

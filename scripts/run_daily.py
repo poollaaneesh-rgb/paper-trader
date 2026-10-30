@@ -9,7 +9,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from paper_trader import data, engines, live, metrics, report
+from paper_trader import challengers, data, engines, live, metrics, report
 from paper_trader.config import DATA_START, LIVE_START, MARKETS, START_CASH
 
 RES = ROOT / "results"
@@ -76,20 +76,36 @@ def main():
         if splits[k]:
             print(f"{k}: split detected: {splits[k]}")
     live.apply_splits(state, splits, today)
-    state, eq_rows, trade_rows, setting_rows = live.run(state, panels, today)
+    # Challengers written by the nightly review; a broken file starts no new ones, and those running carry on.
+    book_path = LIVE / "challengers.json"
+    try:
+        entries = challengers.load(book_path)
+    except ValueError as exc:
+        print(f"challengers.json unreadable, no new challengers tonight: {exc}")
+        entries = None
+    book = challengers.Book(entries or [])
+    state, eq_rows, trade_rows, setting_rows = live.run(state, panels, today, book=book)
     _append(LIVE / "equity.csv", eq_rows)
     _append(LIVE / "trades.csv", trade_rows)
     _append(LIVE / "settings.csv", setting_rows)
+    _append(LIVE / "challengers.csv", book.rows)
+    if entries is not None and book.sync(state):
+        challengers.save(book_path, book.entries)
+    for line in book.events:
+        print(line)
     state_path.write_text(json.dumps(state, indent=2, default=str))
     backtest = json.loads((RES / "backtest" / "summary.json").read_text())
     summary = {
         "generated_at": pd.Timestamp.now(tz="UTC").isoformat(timespec="minutes"),
-        "live": live_summary(state["skips"], state["accounts"]),
+        "live": {**live_summary(state["skips"], state["accounts"]), "challengers": challengers.summary(state)},
         "backtest": backtest,
     }
     (RES / "summary.json").write_text(json.dumps(summary, indent=2, default=str))
     report.build(RES, ROOT / "site")
-    print(f"processed {len(eq_rows)} account-days, {len(trade_rows)} trades, {len(setting_rows)} setting changes")
+    print(
+        f"processed {len(eq_rows)} account-days, {len(trade_rows)} trades, {len(setting_rows)} setting changes, "
+        f"{len(book.rows)} challenger-days"
+    )
 
 
 if __name__ == "__main__":

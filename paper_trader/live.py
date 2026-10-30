@@ -102,14 +102,17 @@ def _setting_change(a: dict, name: str, mkey: str, d, diag: dict) -> dict | None
     return {"date": d, "account": name, "variant": vid, "description": variants.describe(vid), "reason": reason}
 
 
-def run(state: dict, panels: dict, today, markets=None, accounts=None):
+def run(state: dict, panels: dict, today, markets=None, accounts=None, book=None):
     """Advance every account. Returns (state, equity rows, trade rows, settings rows).
 
+    `book` (challengers.Book) steps the nightly review's challengers beside their accounts and collects their rows.
     Re-running on the same data is a no-op.
     """
     markets = markets or MARKETS
     accounts = accounts or engines.ACCOUNTS
     eq_rows, trade_rows, setting_rows = [], [], []
+    if book is not None:
+        book.admit(state, accounts, today)
     for mkey, market in markets.items():
         panel = panels.get(mkey)
         reason = stale_reason(mkey, panel, today)
@@ -130,6 +133,8 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None):
             if len(new_days) == 0:
                 continue
             w, explain, diag = engines.targets(kind, market, panel, LIVE_START)
+            if a.get("following"):  # a promoted challenger holds the account; the menu layer's choice is not applied
+                w, explain = engines.challenger_targets(kind, market, panel, a["following"]["variant"], diag)
             if not a["initialised"]:
                 decide = panel.dates[panel.dates < start][-1]
                 row = w.loc[decide]
@@ -141,6 +146,7 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None):
                     setting_rows.append(change)
             acct = Account(cash=a["cash"], positions=dict(a["positions"]))
             avg_cost = dict(a["avg_cost"])
+            runners = book.open(state, name, kind, market, panel, diag, a, acct, avg_cost) if book is not None else []
             for d in new_days:
                 rows = simulate.step(acct, d, panel, _series(a["pending"]), market.cost_rate, avg_cost)
                 if rows:
@@ -156,11 +162,19 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None):
                 if a.get("bankrupt"):
                     # Sell anything still held at the next open, then hold cash for good; the equity rows continue.
                     a["pending"] = {t: 0.0 for t in acct.positions} or None
+                    if runners:
+                        book.close_all(runners, d, f"{name} went bankrupt")
                     continue
                 row = w.loc[d] if d in w.index else None
                 a["pending"] = None if row is None or row.isna().all() else row.fillna(0.0).to_dict()
-                change = _setting_change(a, name, mkey, d, diag)
+                change = None if a.get("following") else _setting_change(a, name, mkey, d, diag)
                 if change:
                     setting_rows.append(change)
+                won = book.day(runners, d, acct, avg_cost, equity, panel, market.cost_rate) if runners else None
+                if won is not None:
+                    setting_rows.append(book.promote(state, runners, won, a, name, d, equity))
+                    w, explain = won.weights, won.explain
+                    row = w.loc[d] if d in w.index else None
+                    a["pending"] = None if row is None or row.isna().all() else row.fillna(0.0).to_dict()
             a["cash"], a["positions"], a["avg_cost"] = acct.cash, acct.positions, avg_cost
     return state, eq_rows, trade_rows, setting_rows
