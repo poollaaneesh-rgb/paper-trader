@@ -1,6 +1,5 @@
 import copy
 import json
-import math
 
 import numpy as np
 import pandas as pd
@@ -125,40 +124,107 @@ def test_settings_outside_the_menus_parameters_are_refused():
     assert variants.check_definition("tournament", {**TOUR, "params": {"momentum": {"lookback": 84}}}) is None
 
 
-def test_the_bar_needs_thirty_days_and_a_two_percent_lead():
-    assert challengers.verdict(29, 0.50) is None
-    assert challengers.verdict(30, 0.0199) is None
-    assert challengers.verdict(30, challengers.MARGIN) == "promote"
-    assert challengers.verdict(30, -challengers.MARGIN) == "retire"
-    assert challengers.verdict(119, 0.01) is None
-    assert challengers.verdict(120, 0.01) == "retire"
-    assert challengers.verdict(120, 0.02) == "promote"
+def test_the_bar_needs_twenty_days_a_quarter_more_per_dollar_and_ninety_percent_confidence():
+    assert (challengers.MIN_DAYS, challengers.LEAD, challengers.CONFIDENCE) == (20, 0.25, 0.90)
+    assert challengers.verdict(19, 5.0, 1.0) is None
+    assert challengers.verdict(20, 0.25, 1.0) is None  # more than 25%, not 25%
+    assert challengers.verdict(20, 0.26, 0.89) is None  # the lead without the confidence is not enough
+    assert challengers.verdict(20, 0.26, 0.90) == "promote"
+    assert challengers.verdict(20, -0.25, 0.0) == "retire"
+    assert challengers.verdict(119, 0.1, 0.99) is None
+    assert challengers.verdict(120, 0.1, 0.99) == "retire"
+    assert challengers.verdict(120, 0.3, 0.95) == "promote"
+
+
+def test_the_lead_is_per_dollar_over_the_same_days_and_the_bootstrap_is_seeded():
+    assert challengers.per_dollar_lead(0.125, 0.10) == pytest.approx(0.25)
+    assert challengers.per_dollar_lead(-0.05, -0.10) == pytest.approx(0.5)
+    assert challengers.total([0.1, -0.1]) == pytest.approx(-0.01)
+    rng = np.random.default_rng(3)
+    noisy = [[a, b] for a, b in zip(rng.normal(0.001, 0.02, 25), rng.normal(0.0, 0.02, 25), strict=True)]
+    assert challengers.p_better(noisy) == challengers.p_better(noisy)  # the same days give the same verdict
+    assert 0.0 < challengers.p_better(noisy) < 1.0
+    assert challengers.p_better([[0.01, 0.0]] * 20) == 1.0
+    assert challengers.p_better([[0.0, 0.01]] * 20) == 0.0
 
 
 def test_the_account_switches_only_once_the_challenger_clears_the_bar(fakes):
-    # AAA rises 0.2% a day while the live account sits in cash: the challenger leads by 2% from its 12th day, but the
-    # bar also needs 30 days of its own, so it takes over at the close of its 30th day (Oct 11 + 29 = Nov 9).
+    # AAA rises 0.2% a day while the live account sits in cash: the challenger leads from its second day, but the
+    # bar also needs 20 days of its own, so it takes over at the close of its 20th day (Oct 11 + 19 = Oct 30).
     panel = _panel(0.002)
     entries = [_entry(started="2026-10-10")]
     state, *_ = _run(live.init_state(ACCTS), panel, "2026-10-09")
-    state, _, settings, book = _run(state, panel, "2026-11-08", entries)
+    state, _, settings, book = _run(state, panel, "2026-10-29", entries)
     st = state["challengers"]["hold-aaa"]
-    assert settings == [] and st["status"] == "active" and st["days"] == 29 and st["lead"] > challengers.MARGIN
-    assert book.rows[11]["equity"] / 400 - 1 > 0.02  # the lead was there from day 12
-    state, trades, settings, book = _run(state, panel, "2026-11-30", entries)
+    assert settings == [] and st["status"] == "active" and st["days"] == 19
+    assert st["lead"] > challengers.LEAD and st["p_better"] == 1.0
+    state, trades, settings, book = _run(state, panel, "2026-11-20", entries)
     assert len(settings) == 1
     row = settings[0]
-    assert str(row["date"].date()) == "2026-11-09" and row["variant"] == "review:hold-aaa"
-    assert "review challenger hold-aaa (rule R1)" in row["reason"]
-    assert "over its 30 trading days since 2026-10-10" in row["reason"]
+    assert str(row["date"].date()) == "2026-10-30" and row["variant"] == "review:hold-aaa"
+    assert "review challenger hold-aaa (rule R1)" in row["reason"] and "100% likely better" in row["reason"]
+    assert "over its 20 trading days since 2026-10-10" in row["reason"]
     st = state["challengers"]["hold-aaa"]
-    assert st["status"] == "promoted" and st["ended"] == "2026-11-09" and st["days"] == 30
-    assert [str(r["date"].date()) for r in book.rows] == ["2026-11-09"]  # its own record stops when it takes over
+    assert st["status"] == "promoted" and st["ended"] == "2026-10-30" and st["days"] == 20
+    assert [str(r["date"].date()) for r in book.rows] == ["2026-10-30"]  # its own record stops when it takes over
     a = state["accounts"]["tournament_crypto"]
     assert a["following"]["id"] == "hold-aaa" and a["variant"] == "review:hold-aaa"
     first = [t for t in trades if t["account"] == "tournament_crypto"]
-    assert str(first[0]["date"].date()) == "2026-11-10" and first[0]["ticker"] == "AAA" and first[0]["side"] == "buy"
-    assert book.sync(state) and entries[0]["status"] == "promoted" and entries[0]["ended"] == "2026-11-09"
+    assert str(first[0]["date"].date()) == "2026-10-31" and first[0]["ticker"] == "AAA" and first[0]["side"] == "buy"
+    assert book.sync(state) and entries[0]["status"] == "promoted" and entries[0]["ended"] == "2026-10-30"
+    assert a["watch"]["id"] == "hold-aaa" and a["watch"]["replaced"] is None and a["watch"]["days"] == 21
+
+
+def _turning_panel(turn: str, up: float, down: float) -> Panel:
+    """AAA rises by `up` a day until `turn`, then moves by `down` a day; BBB stays at 100."""
+    dates = pd.date_range("2026-01-01", "2027-06-30", freq="D")
+    steps = np.where(dates <= pd.Timestamp(turn), 1 + up, 1 + down)
+    close = pd.DataFrame({"AAA": 100 * np.cumprod(steps), "BBB": 100.0}, index=dates)
+    return Panel(open=close.copy(), close=close, volume=close * 0 + 1)
+
+
+def test_an_adopted_challenger_that_trails_the_version_it_replaced_over_30_days_is_reverted(fakes):
+    panel = _turning_panel("2026-10-30", 0.002, -0.003)  # it takes over on Oct 30, then AAA falls
+    state, *_ = _run(live.init_state(ACCTS), panel, "2026-10-09")
+    state, trades, settings, _ = _run(state, panel, "2026-12-31", [_entry(started="2026-10-10")])
+    assert [str(r["date"].date()) for r in settings] == ["2026-10-30", "2026-11-29"]
+    back = settings[1]
+    assert back["variant"] is None or back["variant"] == ""
+    assert (
+        "reverted review challenger hold-aaa" in back["reason"] and "over its first 30 trading days" in back["reason"]
+    )
+    a = state["accounts"]["tournament_crypto"]
+    assert "following" not in a and "watch" not in a
+    st = state["challengers"]["hold-aaa"]
+    assert st["status"] == "reverted" and st["ended"] == "2026-11-29"
+    sold = [t for t in trades if t["account"] == "tournament_crypto" and t["side"] == "sell"]
+    assert str(sold[0]["date"].date()) == "2026-11-30"  # back in cash, the replaced version, from the next open
+
+
+def test_an_adopted_challenger_that_holds_up_is_kept_and_the_next_change_waits_for_the_watch(fakes):
+    panel = _panel(0.002)
+    state, *_ = _run(live.init_state(ACCTS), panel, "2026-10-09")
+    entries = [_entry(started="2026-10-10"), _entry(cid="late", started="2026-10-20")]
+    state, _, settings, book = _run(state, panel, "2026-12-31", entries)
+    # hold-aaa takes over Oct 30 and is watched through Nov 29. "late" clears the bar from its 20th day (Nov 9) but
+    # waits: it takes over only once the watch has closed and kept hold-aaa.
+    assert [(str(r["date"].date()), r["variant"]) for r in settings] == [
+        ("2026-10-30", "review:hold-aaa"),
+        ("2026-11-29", "review:late"),
+    ]
+    assert any("kept on tournament_crypto after 30 days" in e for e in book.events)
+    assert state["challengers"]["hold-aaa"]["result"] == "replaced by late"
+
+
+def test_no_challenger_takes_over_while_an_adopted_one_is_under_watch(fakes, monkeypatch):
+    panel = _panel(0.002)
+    state, *_ = _run(live.init_state(ACCTS), panel, "2026-10-09")
+    state, *_ = _run(state, panel, "2026-10-30", [_entry(started="2026-10-10")])
+    assert state["accounts"]["tournament_crypto"]["watch"]["days"] == 0
+    monkeypatch.setattr(challengers, "verdict", lambda days, lead, p: "promote")
+    entries = [_entry(started="2026-10-10"), _entry(cid="next", started="2026-10-30")]
+    state, _, settings, _ = _run(state, panel, "2026-11-10", entries)
+    assert settings == [] and state["challengers"]["next"]["status"] == "active"
 
 
 def test_one_run_or_many_give_the_same_challenger_record(fakes):
@@ -175,9 +241,9 @@ def test_one_run_or_many_give_the_same_challenger_record(fakes):
 
 @pytest.mark.parametrize(
     "drift, days, result",
-    [(-0.002, 30, "behind the live setting by"), (0.0, 120, "short of the bar")],
+    [(-0.002, 20, "behind the live setting per dollar by"), (0.0, 120, "short of the bar")],
 )
-def test_a_challenger_is_retired_when_it_trails_after_30_days_or_has_not_cleared_by_120(fakes, drift, days, result):
+def test_a_challenger_is_retired_when_it_trails_after_20_days_or_has_not_cleared_by_120(fakes, drift, days, result):
     panel = _panel(drift)
     state, *_ = _run(live.init_state(ACCTS), panel, "2026-10-10")
     state, _, settings, book = _run(state, panel, "2027-06-29", [_entry(started="2026-10-10")])
@@ -265,7 +331,3 @@ def test_the_check_command_reports_each_entry(tmp_path):
     assert challengers.main(tmp_path) == 0
     (live_dir / "challengers.json").write_text(json.dumps([good, _entry(cid="old", started="2026-10-01")]))
     assert challengers.main(tmp_path) == 1
-
-
-def test_the_lead_is_the_log_return_gap_over_the_same_days():
-    assert challengers._lead(408.0, 400.0) == pytest.approx(math.log(1.02))

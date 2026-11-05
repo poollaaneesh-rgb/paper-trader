@@ -28,7 +28,18 @@ Each engine has a fixed menu of settings (`paper_trader/variants.py`): 38 for th
 
 The layer is a function of price history alone, so the truncation tests cover it: run it on data cut off at day *t* and the choice for *t* does not change. Each change the live accounts make is logged in `results/live/settings.csv` with its reason and shown on the page; the live record itself is never recomputed.
 
-Since 2026-10-29 a nightly review of each bot's trades can propose a new setting, but only as a challenger in `results/live/challengers.json` (`paper_trader/challengers.py`, at most two per account, engine settings only: never cash, costs, sizing or the universe). A challenger starts from a copy of its account on the day it is added and is scored only on the days after it, never on history its author had already seen; its daily equity goes to `results/live/challengers.csv`. After at least 30 trading days, one ahead of the live account by 2% (log return over exactly those days) takes over through the settings log, and one 2% behind, or still short after 120 days, is retired.
+Since 2026-10-29 a nightly review of each bot's trades can propose a new setting, but only as a challenger in `results/live/challengers.json` (`paper_trader/challengers.py`, at most two per account, engine settings only: never cash, costs, sizing or the universe). A challenger starts from a copy of its account on the day it is added and is scored only on the days after it, never on history its author had already seen; its daily equity goes to `results/live/challengers.csv`. The bar is in the next section.
+
+## Loss replay
+
+Since 2026-11-05 a loss is replayed before anything is changed (the owner's decision of that day, shared with the Kalshi bots).
+
+- **Every decision is recorded** in `results/live/decisions.csv`: the close it was made at, the data date (the last close in that night's prices), a digest of those prices, the code version (git short hash), the setting and the targets. The engines are pure functions of the frozen price panel, so this is enough to recompute any night exactly. The file is append-only and never recomputed, like the rest of the live record.
+- **`python -m paper_trader.replay <account> <day>`** rebuilds that night's prices (checked against the digest), runs that code version from `git archive` in a child process with the network off, and says whether it gives the recorded targets. If it does not, the replay is the first defect. It writes nothing.
+- **`--fix '<setting as JSON>'`** tries a candidate setting: it must change that day's targets, and over every other settled decision of the account it must earn more than 25% more per dollar than the live decisions did (target weights times the move from the next open to the open after, less costs). A fix that passes may enter as a challenger; it never changes the account directly. If plain bad luck explains the loss as well, the result is a dated note, not a fix.
+- **Promotion** (`paper_trader/challengers.py`): after at least 20 trading days of its own, a challenger takes over when its return per dollar over exactly those days leads the live account's by more than 25% and a bootstrap of its daily return gaps (2,000 resamples, fixed seed) gives at least a 90% chance it is better. One 25% behind after 20 days, or short of the bar after 120, is retired. This replaced the earlier bar of a 2% log-return lead after 30 days.
+- **Revert:** the version an adopted challenger replaced keeps running as a shadow; if the adopted one trails it by 25% per dollar over its next 30 trading days, the account goes back to it through the settings log.
+- **One change at a time per account:** no challenger takes over while an adopted one is under watch, or on the day of a revert. Decisions made before the records began have none; a replay of them says so, and a fix's score recomputes their live targets with today's code.
 
 ## Findings so far (backtest)
 
@@ -48,7 +59,8 @@ Since 2026-10-29 a nightly review of each bot's trades can propose a new setting
 | `paper_trader/tournament.py` | Capital allocation across the three strategies by trailing Sharpe, at a chosen lookback and cadence |
 | `paper_trader/features.py`, `ml.py` | Nine price features, the forward label, weekly walk-forward retraining |
 | `paper_trader/variants.py`, `selftune.py` | The menus of settings per engine, and the layer that follows the leader after costs |
-| `paper_trader/challengers.py` | Settings proposed by the nightly review, run forward from the day they are added and adopted past the same bar |
+| `paper_trader/challengers.py` | Settings proposed by the nightly review, run forward from the day they are added, adopted past the bar and reverted if they trail |
+| `paper_trader/decisions.py`, `replay.py` | The per-decision record, and the sandboxed replay of a day with a candidate fix |
 | `paper_trader/portfolio.py`, `simulate.py` | Cash-and-units account with costs; next-open fills |
 | `paper_trader/live.py`, `data.py` | Nightly step-forward with stale-data guards; yfinance plus Coinbase fallback |
 | `paper_trader/metrics.py`, `report.py` | Scorecard numbers and the static results page |

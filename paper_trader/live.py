@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pandas as pd
 
+from paper_trader import decisions as records
 from paper_trader import engines, selftune, simulate, variants
 from paper_trader.config import BANKRUPT_AT, FEE_CHANGE_NOTE, LIVE_START, MARKETS, START_CASH
 from paper_trader.portfolio import Account
@@ -102,11 +103,12 @@ def _setting_change(a: dict, name: str, mkey: str, d, diag: dict) -> dict | None
     return {"date": d, "account": name, "variant": vid, "description": variants.describe(vid), "reason": reason}
 
 
-def run(state: dict, panels: dict, today, markets=None, accounts=None, book=None):
+def run(state: dict, panels: dict, today, markets=None, accounts=None, book=None, decisions=None):
     """Advance every account. Returns (state, equity rows, trade rows, settings rows).
 
     `book` (challengers.Book) steps the nightly review's challengers beside their accounts and collects their rows.
-    Re-running on the same data is a no-op.
+    `decisions`, a list, collects one decisions.py record per account per decision. Re-running on the same data is a
+    no-op.
     """
     markets = markets or MARKETS
     accounts = accounts or engines.ACCOUNTS
@@ -121,6 +123,12 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None, book=None
                 state["skips"] + [{"run": str(pd.Timestamp(today).date()), "market": mkey, "reason": reason}]
             )[-30:]
             continue
+        panel_digest = records.digest(panel) if decisions is not None else ""
+
+        def note(d, name, a, panel=panel, panel_digest=panel_digest):
+            if decisions is not None:
+                decisions.append(records.row(d, name, panel, panel_digest, a))
+
         for name, (akey, kind) in accounts.items():
             if akey != mkey:
                 continue
@@ -133,6 +141,7 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None, book=None
             if len(new_days) == 0:
                 continue
             w, explain, diag = engines.targets(kind, market, panel, LIVE_START)
+            menu = (w, explain)
             if a.get("following"):  # a promoted challenger holds the account; the menu layer's choice is not applied
                 w, explain = engines.challenger_targets(kind, market, panel, a["following"]["variant"], diag)
             if not a["initialised"]:
@@ -144,6 +153,7 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None, book=None
                 change = _setting_change(a, name, mkey, decide, diag)
                 if change:
                     setting_rows.append(change)
+                note(decide, name, a)
             acct = Account(cash=a["cash"], positions=dict(a["positions"]))
             avg_cost = dict(a["avg_cost"])
             runners = book.open(state, name, kind, market, panel, diag, a, acct, avg_cost) if book is not None else []
@@ -162,19 +172,36 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None, book=None
                 if a.get("bankrupt"):
                     # Sell anything still held at the next open, then hold cash for good; the equity rows continue.
                     a["pending"] = {t: 0.0 for t in acct.positions} or None
+                    a.pop("watch", None)
                     if runners:
                         book.close_all(runners, d, f"{name} went bankrupt")
+                    note(d, name, a)
                     continue
                 row = w.loc[d] if d in w.index else None
                 a["pending"] = None if row is None or row.isna().all() else row.fillna(0.0).to_dict()
                 change = None if a.get("following") else _setting_change(a, name, mkey, d, diag)
                 if change:
                     setting_rows.append(change)
-                won = book.day(runners, d, acct, avg_cost, equity, panel, market.cost_rate) if runners else None
+                reverted = False
+                if book is not None and a.get("watch"):
+                    replaced = a["watch"]["replaced"]
+                    old = (
+                        engines.challenger_targets(kind, market, panel, replaced["variant"], diag) if replaced else menu
+                    )
+                    back = book.watch(state, a, name, kind, d, equity, panel, market.cost_rate, old[0])
+                    if back is not None:  # the adopted challenger trailed the version it replaced: go back to it
+                        setting_rows.append(back)
+                        w, explain = old
+                        row = w.loc[d] if d in w.index else None
+                        a["pending"] = None if row is None or row.isna().all() else row.fillna(0.0).to_dict()
+                        reverted = True
+                hold = reverted or bool(a.get("watch"))  # one change at a time per account
+                won = book.day(runners, d, acct, avg_cost, equity, panel, market.cost_rate, hold) if runners else None
                 if won is not None:
-                    setting_rows.append(book.promote(state, runners, won, a, name, d, equity))
+                    setting_rows.append(book.promote(state, runners, won, a, name, d, equity, acct, avg_cost))
                     w, explain = won.weights, won.explain
                     row = w.loc[d] if d in w.index else None
                     a["pending"] = None if row is None or row.isna().all() else row.fillna(0.0).to_dict()
+                note(d, name, a)
             a["cash"], a["positions"], a["avg_cost"] = acct.cash, acct.positions, avg_cost
     return state, eq_rows, trade_rows, setting_rows
