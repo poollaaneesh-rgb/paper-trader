@@ -141,6 +141,7 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None, book=None
             if len(new_days) == 0:
                 continue
             w, explain, diag = engines.targets(kind, market, panel, LIVE_START)
+            menu = (w, explain)
             if a.get("following"):  # a promoted challenger holds the account; the menu layer's choice is not applied
                 w, explain = engines.challenger_targets(kind, market, panel, a["following"]["variant"], diag)
             if not a["initialised"]:
@@ -171,6 +172,7 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None, book=None
                 if a.get("bankrupt"):
                     # Sell anything still held at the next open, then hold cash for good; the equity rows continue.
                     a["pending"] = {t: 0.0 for t in acct.positions} or None
+                    a.pop("watch", None)
                     if runners:
                         book.close_all(runners, d, f"{name} went bankrupt")
                     note(d, name, a)
@@ -180,9 +182,23 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None, book=None
                 change = None if a.get("following") else _setting_change(a, name, mkey, d, diag)
                 if change:
                     setting_rows.append(change)
-                won = book.day(runners, d, acct, avg_cost, equity, panel, market.cost_rate) if runners else None
+                reverted = False
+                if book is not None and a.get("watch"):
+                    replaced = a["watch"]["replaced"]
+                    old = (
+                        engines.challenger_targets(kind, market, panel, replaced["variant"], diag) if replaced else menu
+                    )
+                    back = book.watch(state, a, name, kind, d, equity, panel, market.cost_rate, old[0])
+                    if back is not None:  # the adopted challenger trailed the version it replaced: go back to it
+                        setting_rows.append(back)
+                        w, explain = old
+                        row = w.loc[d] if d in w.index else None
+                        a["pending"] = None if row is None or row.isna().all() else row.fillna(0.0).to_dict()
+                        reverted = True
+                hold = reverted or bool(a.get("watch"))  # one change at a time per account
+                won = book.day(runners, d, acct, avg_cost, equity, panel, market.cost_rate, hold) if runners else None
                 if won is not None:
-                    setting_rows.append(book.promote(state, runners, won, a, name, d, equity))
+                    setting_rows.append(book.promote(state, runners, won, a, name, d, equity, acct, avg_cost))
                     w, explain = won.weights, won.explain
                     row = w.loc[d] if d in w.index else None
                     a["pending"] = None if row is None or row.isna().all() else row.fillna(0.0).to_dict()
