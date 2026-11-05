@@ -9,7 +9,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from paper_trader import challengers, data, engines, live, metrics, report
+from paper_trader import challengers, data, decisions, engines, live, metrics, report
 from paper_trader.config import DATA_START, LIVE_START, MARKETS, START_CASH
 
 RES = ROOT / "results"
@@ -71,8 +71,11 @@ def main():
         # The days already used are kept as first downloaded (see data.freeze); only new days are added.
         path = LIVE / f"prices_{k}.csv"
         raw, scale = data.load_frozen(path)
-        panels[k], raw, scale, splits[k] = data.freeze(fresh, raw, scale)
+        _, raw, scale, splits[k] = data.freeze(fresh, raw, scale)
         data.save_frozen(path, raw, scale)
+        # Trade on the prices as stored (a CSV round trip moves the last digit), so a replay reads exactly them.
+        stored, scale = data.load_frozen(path)
+        panels[k] = data._scaled(stored, scale)
         if splits[k]:
             print(f"{k}: split detected: {splits[k]}")
     live.apply_splits(state, splits, today)
@@ -84,11 +87,16 @@ def main():
         print(f"challengers.json unreadable, no new challengers tonight: {exc}")
         entries = None
     book = challengers.Book(entries or [])
-    state, eq_rows, trade_rows, setting_rows = live.run(state, panels, today, book=book)
+    decision_rows: list[dict] = []
+    state, eq_rows, trade_rows, setting_rows = live.run(state, panels, today, book=book, decisions=decision_rows)
+    code = decisions.code_version(ROOT)
+    for r in decision_rows:
+        r["code"] = code
     _append(LIVE / "equity.csv", eq_rows)
     _append(LIVE / "trades.csv", trade_rows)
     _append(LIVE / "settings.csv", setting_rows)
     _append(LIVE / "challengers.csv", book.rows)
+    _append(LIVE / "decisions.csv", decision_rows)
     if entries is not None and book.sync(state):
         challengers.save(book_path, book.entries)
     for line in book.events:

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pandas as pd
 
+from paper_trader import decisions as records
 from paper_trader import engines, selftune, simulate, variants
 from paper_trader.config import BANKRUPT_AT, FEE_CHANGE_NOTE, LIVE_START, MARKETS, START_CASH
 from paper_trader.portfolio import Account
@@ -102,11 +103,12 @@ def _setting_change(a: dict, name: str, mkey: str, d, diag: dict) -> dict | None
     return {"date": d, "account": name, "variant": vid, "description": variants.describe(vid), "reason": reason}
 
 
-def run(state: dict, panels: dict, today, markets=None, accounts=None, book=None):
+def run(state: dict, panels: dict, today, markets=None, accounts=None, book=None, decisions=None):
     """Advance every account. Returns (state, equity rows, trade rows, settings rows).
 
     `book` (challengers.Book) steps the nightly review's challengers beside their accounts and collects their rows.
-    Re-running on the same data is a no-op.
+    `decisions`, a list, collects one decisions.py record per account per decision. Re-running on the same data is a
+    no-op.
     """
     markets = markets or MARKETS
     accounts = accounts or engines.ACCOUNTS
@@ -121,6 +123,12 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None, book=None
                 state["skips"] + [{"run": str(pd.Timestamp(today).date()), "market": mkey, "reason": reason}]
             )[-30:]
             continue
+        panel_digest = records.digest(panel) if decisions is not None else ""
+
+        def note(d, name, a, panel=panel, panel_digest=panel_digest):
+            if decisions is not None:
+                decisions.append(records.row(d, name, panel, panel_digest, a))
+
         for name, (akey, kind) in accounts.items():
             if akey != mkey:
                 continue
@@ -144,6 +152,7 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None, book=None
                 change = _setting_change(a, name, mkey, decide, diag)
                 if change:
                     setting_rows.append(change)
+                note(decide, name, a)
             acct = Account(cash=a["cash"], positions=dict(a["positions"]))
             avg_cost = dict(a["avg_cost"])
             runners = book.open(state, name, kind, market, panel, diag, a, acct, avg_cost) if book is not None else []
@@ -164,6 +173,7 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None, book=None
                     a["pending"] = {t: 0.0 for t in acct.positions} or None
                     if runners:
                         book.close_all(runners, d, f"{name} went bankrupt")
+                    note(d, name, a)
                     continue
                 row = w.loc[d] if d in w.index else None
                 a["pending"] = None if row is None or row.isna().all() else row.fillna(0.0).to_dict()
@@ -176,5 +186,6 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None, book=None
                     w, explain = won.weights, won.explain
                     row = w.loc[d] if d in w.index else None
                     a["pending"] = None if row is None or row.isna().all() else row.fillna(0.0).to_dict()
+                note(d, name, a)
             a["cash"], a["positions"], a["avg_cost"] = acct.cash, acct.positions, avg_cost
     return state, eq_rows, trade_rows, setting_rows
