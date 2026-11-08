@@ -15,3 +15,7 @@ date,account,data_date,data_digest,code,setting,following,targets
 2026-11-06,ml_crypto,2026-11-06,af4cfc36d8a1,233f1366cb,ml:in52-out52-hold10,,BTC-USD=0.333333;SOL-USD=0.333333;XRP-USD=0.333333
 2026-11-06,bench_btc,2026-11-06,af4cfc36d8a1,233f1366cb,,,
 2026-11-06,bench_eq_crypto,2026-11-06,af4cfc36d8a1,233f1366cb,,,
+2026-11-07,tournament_crypto,2026-11-07,49bf35368826,83d57e3654,tour:default-21-D-net,,ADA-USD=0.111111;BNB-USD=0.111111;SOL-USD=0.111111;XRP-USD=0.111111
+2026-11-07,ml_crypto,2026-11-07,49bf35368826,83d57e3654,ml:in52-out52-hold10,,BTC-USD=0.333333;SOL-USD=0.333333;XRP-USD=0.333333
+2026-11-07,bench_btc,2026-11-07,49bf35368826,83d57e3654,,,
+2026-11-07,bench_eq_crypto,2026-11-07,49bf35368826,83d57e3654,,,

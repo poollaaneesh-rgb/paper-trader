@@ -87,28 +87,30 @@
       "variant": "tour:default-21-M-net"
     },
     "tournament_crypto": {
-      "cash": 193.20110715934203,
+      "cash": 117.9241461364977,
       "positions": {
         "SOL-USD": 0.4015004273578344,
         "BNB-USD": 0.05328168632674701,
         "XRP-USD": 31.373951412505864,
-        "ADA-USD": 209.56590228175557
+        "ADA-USD": 411.80157288536554,
+        "BTC-USD": 0.0004998603930935773
       },
       "avg_cost": {
         "SOL-USD": 103.48480939089914,
         "BNB-USD": 741.1537140122756,
         "XRP-USD": 1.2096090028285982,
-        "ADA-USD": 0.18108964134752747
+        "ADA-USD": 0.18273533017148824,
+        "BTC-USD": 75974.1704765625
       },
       "pending": {
-        "BTC-USD": 0.1111111111111111,
+        "BTC-USD": 0.0,
         "ETH-USD": 0.0,
         "SOL-USD": 0.1111111111111111,
         "BNB-USD": 0.1111111111111111,
         "XRP-USD": 0.1111111111111111,
-        "ADA-USD": 0.2222222222222222
+        "ADA-USD": 0.1111111111111111
       },
-      "last_date": "2026-11-06",
+      "last_date": "2026-11-07",
       "initialised": true,
       "variant": "tour:default-21-D-net"
     },
@@ -165,16 +167,16 @@
       "variant": "ml:in55-out55-hold5"
     },
     "ml_crypto": {
-      "cash": 4.635648037483253,
+      "cash": 2.3586869120711924,
       "positions": {
-        "ETH-USD": 0.04796815205585268,
         "SOL-USD": 1.1855735586392837,
-        "BTC-USD": 0.0014374238811241927
+        "BTC-USD": 0.0014374238811241927,
+        "XRP-USD": 92.38768129752995
       },
       "avg_cost": {
-        "ETH-USD": 2327.2420937499996,
         "SOL-USD": 94.73799187469483,
-        "BTC-USD": 76907.328765625
+        "BTC-USD": 76907.328765625,
+        "XRP-USD": 1.1816122895479202
       },
       "pending": {
         "BTC-USD": 0.3333333333333333,
@@ -184,7 +186,7 @@
         "XRP-USD": 0.3333333333333333,
         "ADA-USD": 0.0
       },
-      "last_date": "2026-11-06",
+      "last_date": "2026-11-07",
       "initialised": true,
       "variant": "ml:in52-out52-hold10"
     },
@@ -209,7 +211,7 @@
         "BTC-USD": 84081.31612890626
       },
       "pending": null,
-      "last_date": "2026-11-06",
+      "last_date": "2026-11-07",
       "initialised": true
     },
     "bench_eq_stocks": {
@@ -303,7 +305,7 @@
         "ETH-USD": 2691.8705490722655
       },
       "pending": null,
-      "last_date": "2026-11-06",
+      "last_date": "2026-11-07",
       "initialised": true,
       "variant": null,
       "bankrupt": null
