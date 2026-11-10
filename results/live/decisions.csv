@@ -23,3 +23,11 @@ date,account,data_date,data_digest,code,setting,following,targets
 2026-11-08,ml_crypto,2026-11-08,dcad6c7d7297,bf63ea26cb,ml:in52-out52-hold10,,cash
 2026-11-08,bench_btc,2026-11-08,dcad6c7d7297,bf63ea26cb,,,
 2026-11-08,bench_eq_crypto,2026-11-08,dcad6c7d7297,bf63ea26cb,,,
+2026-11-09,tournament_stocks,2026-11-09,34734ba25b89,e897ef25cc,tour:default-21-M-net,,AAPL=0.033306;AMZN=0.033306;BRK-B=0.033306;GOOGL=0.016667;IWM=0.033306;JNJ=0.033306;JPM=0.033306;KO=0.033306;LLY=0.113387;MA=0.113387;MSFT=0.033306;NVDA=0.016667;PG=0.033306;QQQ=0.016667;UNH=0.033306;V=0.113387;XLE=0.096747;XLF=0.033306;XLK=0.016667;XLV=0.033306;XOM=0.096747
+2026-11-09,ml_stocks,2026-11-09,34734ba25b89,e897ef25cc,ml:in55-out55-hold5,,AAPL=0.200000;GOOGL=0.200000;NVDA=0.200000;XLE=0.200000;XOM=0.200000
+2026-11-09,bench_spy,2026-11-09,34734ba25b89,e897ef25cc,,,
+2026-11-09,bench_eq_stocks,2026-11-09,34734ba25b89,e897ef25cc,,,
+2026-11-09,tournament_crypto,2026-11-09,9a8324933cd0,e897ef25cc,tour:fast-63-M-net,,cash
+2026-11-09,ml_crypto,2026-11-09,9a8324933cd0,e897ef25cc,ml:in52-out52-hold10,,cash
+2026-11-09,bench_btc,2026-11-09,9a8324933cd0,e897ef25cc,,,
+2026-11-09,bench_eq_crypto,2026-11-09,9a8324933cd0,e897ef25cc,,,
