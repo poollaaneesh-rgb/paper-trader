@@ -90,13 +90,17 @@ def main():
     decision_rows: list[dict] = []
     state, eq_rows, trade_rows, setting_rows = live.run(state, panels, today, book=book, decisions=decision_rows)
     code = decisions.code_version(ROOT)
+    decided_at = pd.Timestamp.now(tz="UTC").strftime("%Y-%m-%dT%H:%M:%SZ")
     for r in decision_rows:
         r["code"] = code
+        r["decided_at"] = decided_at
     _append(LIVE / "equity.csv", eq_rows)
     _append(LIVE / "trades.csv", trade_rows)
     _append(LIVE / "settings.csv", setting_rows)
     _append(LIVE / "challengers.csv", book.rows)
-    _append(LIVE / "decisions.csv", decision_rows)
+    if decision_rows:
+        decisions.widen(LIVE / "decisions.csv")  # rows written before 2026-11-12 get the record fields, blank
+    _append(LIVE / "decisions.csv", [{c: r.get(c, "") for c in decisions.FIELDS} for r in decision_rows])
     if entries is not None and book.sync(state):
         challengers.save(book_path, book.entries)
     for line in book.events:

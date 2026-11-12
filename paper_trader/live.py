@@ -125,9 +125,9 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None, book=None
             continue
         panel_digest = records.digest(panel) if decisions is not None else ""
 
-        def note(d, name, a, panel=panel, panel_digest=panel_digest):
+        def note(d, name, a, kind, diag, panel=panel, panel_digest=panel_digest, market=market):
             if decisions is not None:
-                decisions.append(records.row(d, name, panel, panel_digest, a))
+                decisions.append(records.row(d, name, panel, panel_digest, a, kind, market, diag.get("probs")))
 
         for name, (akey, kind) in accounts.items():
             if akey != mkey:
@@ -153,7 +153,7 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None, book=None
                 change = _setting_change(a, name, mkey, decide, diag)
                 if change:
                     setting_rows.append(change)
-                note(decide, name, a)
+                note(decide, name, a, kind, diag)
             acct = Account(cash=a["cash"], positions=dict(a["positions"]))
             avg_cost = dict(a["avg_cost"])
             runners = book.open(state, name, kind, market, panel, diag, a, acct, avg_cost) if book is not None else []
@@ -175,7 +175,7 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None, book=None
                     a.pop("watch", None)
                     if runners:
                         book.close_all(runners, d, f"{name} went bankrupt")
-                    note(d, name, a)
+                    note(d, name, a, kind, diag)
                     continue
                 row = w.loc[d] if d in w.index else None
                 a["pending"] = None if row is None or row.isna().all() else row.fillna(0.0).to_dict()
@@ -202,6 +202,6 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None, book=None
                     w, explain = won.weights, won.explain
                     row = w.loc[d] if d in w.index else None
                     a["pending"] = None if row is None or row.isna().all() else row.fillna(0.0).to_dict()
-                note(d, name, a)
+                note(d, name, a, kind, diag)
             a["cash"], a["positions"], a["avg_cost"] = acct.cash, acct.positions, avg_cost
     return state, eq_rows, trade_rows, setting_rows
