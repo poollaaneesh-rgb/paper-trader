@@ -55,6 +55,12 @@ def _when(iso: str) -> str:
     return t.strftime("%b %-d, %Y, %-I:%M %p") + " Arizona time"
 
 
+# What the feed carries for each live account. The last three are read by the weekly seats on the bots site: the 30-day
+# return it ranks on, the day an account went bankrupt, and the weights it holds from the next open. They were left out
+# until 2026-11-12, so no nightly account ever reached a seat.
+LIVE_FEED_FIELDS = ("final_equity", "total_return", "days", "n_trades", "return_30d", "bankrupt", "targets")
+
+
 def build(results: Path, site: Path):
     site.mkdir(parents=True, exist_ok=True)
     summary = json.loads((results / "summary.json").read_text())
@@ -76,10 +82,7 @@ def build(results: Path, site: Path):
         "generated_at": summary["generated_at"],
         "page": "https://poollaaneesh-rgb.github.io/paper-trader/",
         "live_start": summary["live"]["start"],
-        "live": {
-            k: {f: v.get(f) for f in ("final_equity", "total_return", "days", "n_trades")}
-            for k, v in summary["live"]["accounts"].items()
-        },
+        "live": {k: {f: v.get(f) for f in LIVE_FEED_FIELDS} for k, v in summary["live"]["accounts"].items()},
         "backtest": {
             k: {f: v.get(f) for f in ("final_equity", "total_return")}
             for k, v in summary["backtest"]["accounts"].items()
