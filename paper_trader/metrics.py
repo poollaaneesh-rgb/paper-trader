@@ -32,7 +32,7 @@ def summary(equity: pd.Series, trades: pd.DataFrame, periods: int, start_cash: f
 def trailing_return(equity: pd.Series, days: int = 30) -> float | None:
     """Return over the last `days` calendar days, from the last mark on or before their start; None until then.
 
-    The scoreboard that picks which bot holds the real money ranks on this (the user's rule, 2026-10-08).
+    The scoreboard that picks which bot holds the weekly seat ranks on this (the user's rule, 2026-10-08).
     """
     if equity.empty:
         return None
