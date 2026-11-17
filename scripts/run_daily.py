@@ -37,11 +37,17 @@ def settings_summary() -> dict:
     return {"current": current, "changes": rows.iloc[::-1].head(20).to_dict("records")}
 
 
-def live_summary(skips, states: dict | None = None) -> dict:
+def markets_to_fetch(today) -> list[str]:
+    """The markets with an account still trading; a market whose accounts have all retired is not downloaded."""
+    return [k for k in MARKETS if not engines.market_retired(k, today)]
+
+
+def live_summary(skips, states: dict | None = None, today=None) -> dict:
     eq = pd.read_csv(LIVE / "equity.csv", parse_dates=["date"]) if (LIVE / "equity.csv").exists() else None
     tr = pd.read_csv(LIVE / "trades.csv") if (LIVE / "trades.csv").exists() else pd.DataFrame()
     out = {"phase": "live paper", "start": LIVE_START, "start_cash": START_CASH, "accounts": {}, "skips": skips}
     out["settings"] = settings_summary()
+    today = pd.Timestamp.now(tz="UTC").tz_localize(None) if today is None else pd.Timestamp(today)
     for name, (mkey, kind) in engines.ACCOUNTS.items():
         series = eq[eq.account == name].set_index("date")["equity"] if eq is not None else pd.Series(dtype=float)
         trades = tr[tr.account == name] if len(tr) else pd.DataFrame(columns=["realized_pnl"])
@@ -51,6 +57,13 @@ def live_summary(skips, states: dict | None = None) -> dict:
         # The weights it holds from the next open, so the live account can copy it when it holds the seat.
         pending = (states or {}).get(name, {}).get("pending") or {}
         s["targets"] = {t: round(float(w), 4) for t, w in pending.items() if w and w > 0}
+        # A retired account keeps its final values; it holds no weights and has no 30-day return for a seat to rank.
+        gone = engines.retirement(name, today)
+        s["retired"] = gone["date"] if gone else None
+        s["retired_cause"] = gone["cause"] if gone else None
+        s["last_date"] = series.index.max().date().isoformat() if len(series) else None
+        if gone:
+            s["targets"], s["return_30d"] = {}, None
         out["accounts"][name] = s
     return out
 
@@ -62,6 +75,9 @@ def main():
     state = json.loads(state_path.read_text()) if state_path.exists() else live.init_state()
     panels, splits = {}, {}
     for k, m in MARKETS.items():
+        if k not in markets_to_fetch(today):
+            print(f"{k}: every account has retired; no prices fetched")
+            continue
         try:
             fresh = data.complete_days(data.fetch(m, DATA_START), today)
         except Exception as exc:  # a failed source skips that market; it never trades on bad data
@@ -109,7 +125,7 @@ def main():
     backtest = json.loads((RES / "backtest" / "summary.json").read_text())
     summary = {
         "generated_at": pd.Timestamp.now(tz="UTC").isoformat(timespec="minutes"),
-        "live": {**live_summary(state["skips"], state["accounts"]), "challengers": challengers.summary(state)},
+        "live": {**live_summary(state["skips"], state["accounts"], today), "challengers": challengers.summary(state)},
         "backtest": backtest,
     }
     (RES / "summary.json").write_text(json.dumps(summary, indent=2, default=str))

@@ -18,3 +18,12 @@ def make_panel(n_days=400, tickers=("AAA", "BBB", "CCC", "DDD"), seed=0, freq="B
 @pytest.fixture
 def panel():
     return make_panel()
+
+
+@pytest.fixture(autouse=True)
+def no_retirements(monkeypatch):
+    """Tests use the crypto account names as ordinary accounts on synthetic dates, some after 2026-11-16; the
+    live retirement map (config.RETIRED) applies only where a test sets engines.RETIRED itself."""
+    from paper_trader import engines
+
+    monkeypatch.setattr(engines, "RETIRED", {}, raising=False)

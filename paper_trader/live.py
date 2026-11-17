@@ -116,6 +116,14 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None, book=None
     if book is not None:
         book.admit(state, accounts, today)
     for mkey, market in markets.items():
+        # A retired account is never stepped again: its record ends at its last mark (config.RETIRED). When all of a
+        # market's accounts have retired its prices are not needed, so missing ones are no skip.
+        retired = {n: engines.retirement(n, today) for n, (akey, _) in accounts.items() if akey == mkey}
+        for name, entry in retired.items():
+            if entry and book is not None:
+                book.retire(state, name, today, f"{name} retired on {entry['date']}")
+        if retired and all(retired.values()):
+            continue
         panel = panels.get(mkey)
         reason = stale_reason(mkey, panel, today)
         if reason:
@@ -130,7 +138,7 @@ def run(state: dict, panels: dict, today, markets=None, accounts=None, book=None
                 decisions.append(records.row(d, name, panel, panel_digest, a, kind, market, diag.get("probs")))
 
         for name, (akey, kind) in accounts.items():
-            if akey != mkey:
+            if akey != mkey or retired.get(name):
                 continue
             # An account added after the state was created joins here, on its first run, at the live start.
             a = state["accounts"].setdefault(name, init_state([name])["accounts"][name])

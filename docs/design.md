@@ -10,10 +10,18 @@ Eight accounts, each starting at $400. A bot "wins" only if it beats its market'
 
 | Account | Universe | Engine |
 |---|---|---|
-| `tournament_stocks` / `tournament_crypto` | 30 US stocks and ETFs / 6 coins | Strategy tournament |
+| `tournament_stocks` / `tournament_crypto` (retired 2026-11-16) | 30 US stocks and ETFs / 6 coins | Strategy tournament |
 | `ml_stocks` / `ml_crypto` | same | Gradient-boosted trees |
 | `bench_spy` / `bench_btc` | SPY / BTC | Buy and hold |
 | `bench_eq_stocks` / `bench_eq_crypto` | same 30 names / same 6 coins | Every name bought in equal amounts on the first live day, never rebalanced |
+
+## Retired accounts (2026-11-16)
+
+On 2026-11-16 Aneesh retired every crypto account. His words: "retire all crypto bots, i do not want to invest in crypto anymore at all." `tournament_crypto`, `ml_crypto`, `bench_btc` and `bench_eq_crypto` are retired from that date; the two crypto benchmarks only existed to measure the crypto accounts, so they go too. The stock accounts and their rules are unchanged, and so is `CRYPTO_GATE`.
+
+- **Declared in `config.RETIRED`** (account to date and cause). From its date an account is never stepped again (`live.run`), and a market whose accounts have all retired is not downloaded at all (`scripts/run_daily.py`), so the nightly run fetches no crypto prices and computes no crypto engine or ML model. A missing crypto download is not recorded as a skip.
+- **Frozen, not sold.** The record ends at the account's last mark: the last close it was valued at before the retirement took effect, with whatever it held then (`last_date` in the summary says which day). No sale is recorded, because a sale needs a price after retirement and that day is never fetched; bankruptcy, by contrast, sells at the next open because the market is still being fetched. On 2026-11-15 the two crypto bots held only cash (the Bitcoin trend gate had them out), so for them frozen and sold are the same; the two benchmarks keep their coins at their last marks.
+- **Kept, not deleted.** The accounts stay in `engines.ACCOUNTS` and in every published file, because live records are append-only. `summary.json` and the site feed carry `retired` (date), `retired_cause` and `last_date` for every account (null while trading). A retired account publishes no `targets` and no `return_30d`, so no weekly seat can rank or copy it. Its challengers end, and the review cannot start new ones on it.
 
 ## Engines
 

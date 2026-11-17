@@ -226,6 +226,9 @@ class Book:
         kind = accounts.get(name, (None, None))[1]
         if kind not in ("tournament", "ml"):
             return f"{name} is not a tournament or ML account"
+        gone = engines.retirement(name, today)
+        if gone:
+            return f"{name} retired on {gone['date']} and trades no more"
         bad = variants.check_definition(kind, entry["variant"])
         if bad:
             return bad
@@ -462,6 +465,13 @@ class Book:
             else (variants.describe(vid) if vid else "")
         )
         return {"date": d, "account": name, "variant": vid, "description": desc, "reason": reason}
+
+    def retire(self, state: dict, name: str, d, reason: str) -> None:
+        """End every active challenger on an account that has retired; it is never stepped again."""
+        for cid, st in state.get("challengers", {}).items():
+            if st.get("account") == name and st.get("status") == "active":
+                _end(st, "retired", d, reason)
+                self.events.append(f"challenger {cid} retired: {reason}")
 
     def close_all(self, runners, d, reason: str) -> None:
         for r in list(runners):

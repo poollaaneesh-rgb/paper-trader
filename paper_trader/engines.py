@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 from paper_trader import ml, selftune, variants
-from paper_trader.config import CRYPTO_GATE, ML_THRESHOLD
+from paper_trader.config import CRYPTO_GATE, ML_THRESHOLD, RETIRED
 from paper_trader.strategies import STRATEGIES
 
 ACCOUNTS = {
@@ -24,6 +24,20 @@ ACCOUNTS = {
     "bench_eq_stocks": ("stocks", "bench_eq"),
     "bench_eq_crypto": ("crypto", "bench_eq"),
 }
+
+
+def retirement(name: str, today, table: dict | None = None) -> dict | None:
+    """The account's retirement entry (config.RETIRED) once its date has come, else None."""
+    entry = (RETIRED if table is None else table).get(name)
+    if entry and pd.Timestamp(today).normalize() >= pd.Timestamp(entry["date"]):
+        return entry
+    return None
+
+
+def market_retired(market_key: str, today, accounts: dict | None = None) -> bool:
+    """True when every account on the market has retired: the nightly run then needs none of its prices."""
+    names = [n for n, (akey, _) in (accounts or ACCOUNTS).items() if akey == market_key]
+    return bool(names) and all(retirement(n, today) for n in names)
 
 
 def _switches(chosen: pd.Series, start) -> int:
@@ -187,4 +201,4 @@ def attach_reasons(trades: pd.DataFrame, panel, explain) -> pd.DataFrame:
     return trades
 
 
-__all__ = ["ACCOUNTS", "ML_THRESHOLD", "attach_reasons", "targets"]
+__all__ = ["ACCOUNTS", "ML_THRESHOLD", "attach_reasons", "market_retired", "retirement", "targets"]

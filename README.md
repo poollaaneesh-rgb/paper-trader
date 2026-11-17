@@ -6,6 +6,8 @@ A strategy tournament and a machine-learning model each trade **$400 of fake mon
 
 Fake money only. Not connected to any brokerage, holds no keys, and is not investment advice.
 
+**Crypto retired on 2026-11-16.** In Aneesh's words: "retire all crypto bots, i do not want to invest in crypto anymore at all." The four crypto accounts (`tournament_crypto`, `ml_crypto`, `bench_btc`, `bench_eq_crypto`) no longer trade, the nightly run fetches no crypto prices, and their records stay frozen at their last close and are listed as retired. See `docs/design.md`, "Retired accounts".
+
 ## Accounts
 
 | Account | Market | Engine |

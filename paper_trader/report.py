@@ -58,7 +58,20 @@ def _when(iso: str) -> str:
 # What the feed carries for each live account. The last three are read by the weekly seats on the bots site: the 30-day
 # return it ranks on, the day an account went bankrupt, and the weights it holds from the next open. They were left out
 # until 2026-11-12, so no nightly account ever reached a seat.
-LIVE_FEED_FIELDS = ("final_equity", "total_return", "days", "n_trades", "return_30d", "bankrupt", "targets")
+# Since 2026-11-16 it also carries `retired` (the date), `retired_cause` and `last_date` (the day of the final mark), so
+# the site can list a retired account with its final value instead of dropping it.
+LIVE_FEED_FIELDS = (
+    "final_equity",
+    "total_return",
+    "days",
+    "n_trades",
+    "return_30d",
+    "bankrupt",
+    "targets",
+    "retired",
+    "retired_cause",
+    "last_date",
+)
 
 
 def build(results: Path, site: Path):

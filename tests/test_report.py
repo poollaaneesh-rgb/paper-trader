@@ -42,4 +42,7 @@ def test_the_feed_carries_what_the_weekly_seats_read(tmp_path):
         "days": 31,
         "n_trades": 4,
         **seat_fields,
+        "retired": None,  # set, with retired_cause and last_date, once an account has retired (2026-11-16)
+        "retired_cause": None,
+        "last_date": None,
     }

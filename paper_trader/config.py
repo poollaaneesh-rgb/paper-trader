@@ -88,3 +88,18 @@ MARKETS = {"stocks": STOCKS, "crypto": CRYPTO}
 # insurance, not an edge in a rally: in 2024 it trailed holding. The self-tuning layer still scores its settings
 # ungated; the gate applies after it, in engines.targets.
 CRYPTO_GATE = {"ticker": "BTC-USD", "days": 100, "band": 0.03}
+
+# Retired accounts: from its date an account is never stepped again. Its record stays as it was at its last mark (the
+# last close it was valued at, with whatever it held then), and the summary and the site list it as retired with the
+# date and cause. Nothing is sold: a sale would need a price after the retirement, and that day is never fetched.
+# Accounts stay in engines.ACCOUNTS, since the live record is append-only and never recomputed.
+# 2026-11-16, the user's words: "retire all crypto bots, i do not want to invest in crypto anymore at all." The crypto
+# benchmarks only measured the crypto accounts, so they retire with them. With every crypto account retired, the
+# nightly run fetches no crypto prices and computes no crypto engine or model.
+_NO_CRYPTO = (
+    'retired by the user on 2026-11-16: "retire all crypto bots, i do not want to invest in crypto anymore at all."'
+)
+RETIRED = {
+    name: {"date": "2026-11-16", "cause": _NO_CRYPTO}
+    for name in ("tournament_crypto", "ml_crypto", "bench_btc", "bench_eq_crypto")
+}
